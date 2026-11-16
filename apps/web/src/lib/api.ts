@@ -27,6 +27,28 @@ export class ApiError extends Error {
 
 const BASE_URL = '/api/v1';
 
+export const API_UNREACHABLE_MESSAGE =
+  'Cannot reach the SI Coin API server. Please make sure the backend is running and deployed, then try again.';
+
+/**
+ * Reads a response body without ever throwing on non-JSON content.
+ * Hosting platforms / proxies return plain-text or HTML error pages when the
+ * API is down or misrouted — surface that as a readable error instead of a
+ * JSON parse crash.
+ */
+export async function parseBody(response: Response): Promise<any> {
+  const text = await response.text();
+  if (!text) return undefined;
+  try {
+    return JSON.parse(text);
+  } catch {
+    if (!response.ok) {
+      throw new ApiError(API_UNREACHABLE_MESSAGE, 'API_UNREACHABLE', response.status);
+    }
+    return text;
+  }
+}
+
 export async function request<T = any>(
   endpoint: string,
   options: RequestInit = {}
@@ -44,13 +66,7 @@ export async function request<T = any>(
     credentials: 'include', // Includes session cookie
   });
 
-  let data: any;
-  const contentType = response.headers.get('content-type');
-  if (contentType && contentType.includes('application/json')) {
-    data = await response.json();
-  } else {
-    data = await response.text();
-  }
+  const data = await parseBody(response);
 
   if (!response.ok) {
     const errorMsg = data?.error?.message || response.statusText || 'An error occurred';

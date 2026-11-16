@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { api, ApiError } from '../lib/api';
+import { api, ApiError, parseBody, API_UNREACHABLE_MESSAGE } from '../lib/api';
 import { UserProfile, Role, ROLE_PERMISSIONS } from '@sicoin/shared';
 
 interface AuthContextType {
@@ -44,7 +44,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       body: JSON.stringify({ email, password, mfaCode }),
     });
 
-    const json = await res.json();
+    const json = await parseBody(res);
+    if (!json || typeof json !== 'object') {
+      throw new ApiError(API_UNREACHABLE_MESSAGE, 'API_UNREACHABLE', res.status);
+    }
     if (!res.ok) {
       throw new ApiError(json.error?.message || 'Login failed', json.error?.code, res.status);
     }
