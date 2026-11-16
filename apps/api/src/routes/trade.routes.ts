@@ -145,7 +145,11 @@ tradeRouter.post('/buy/create-order', async (req: Request, res: Response, next: 
     });
 
     // Generate test signature for convenient testing in sandbox environments
-    const testSignature = RazorpayService.generateTestSignature(rzpOrder.id, `pay_${crypto.randomBytes(6).toString('hex')}`);
+    // Sandbox only: hand clients a matching payment id + HMAC signature so the simulated checkout
+    // verifies cryptographically. Never expose this when live Razorpay credentials are configured.
+    const sandbox = RazorpayService.isSandbox();
+    const testPaymentId = `pay_${crypto.randomBytes(6).toString('hex')}`;
+    const testSignature = sandbox ? RazorpayService.generateTestSignature(rzpOrder.id, testPaymentId) : undefined;
 
     return res.json({
       success: true,
@@ -162,7 +166,7 @@ tradeRouter.post('/buy/create-order', async (req: Request, res: Response, next: 
           currency: rzpOrder.currency,
           keyId: rzpOrder.keyId,
         },
-        testSignatureHelper: testSignature, // Helpful for UI dev & automated test suite
+        ...(sandbox ? { testSignatureHelper: testSignature, testPaymentId } : {}), // sandbox-only helper for UI dev & tests
       },
     });
   } catch (error) {

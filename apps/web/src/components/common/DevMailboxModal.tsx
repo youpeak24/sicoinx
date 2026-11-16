@@ -38,7 +38,7 @@ export const DevMailboxModal: React.FC<{ aboveBottomNav?: boolean }> = ({ aboveB
       {/* Floating Badge Button */}
       <button
         onClick={handleOpen}
-        className={`fixed ${aboveBottomNav ? 'bottom-24 right-4' : 'bottom-5 right-5'} z-50 bg-[#123B9A] hover:bg-[#175CFF] text-white p-3.5 rounded-full shadow-elevated flex items-center gap-2 text-xs font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95 hover:shadow-glow-blue animate-float-slow group`}
+        className={`fixed ${aboveBottomNav ? 'bottom-24 left-4' : 'bottom-5 left-5'} z-50 bg-[#123B9A] hover:bg-[#175CFF] text-white p-3.5 rounded-full shadow-elevated flex items-center gap-2 text-xs font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95 hover:shadow-glow-blue animate-float-slow group`}
         title="Development Email Mailbox (Preview local reset & verification links)"
         aria-label="Development Email Mailbox"
       >

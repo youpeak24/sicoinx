@@ -10,6 +10,7 @@ import { tradeRouter } from './trade.routes';
 import { paymentsRouter } from './payments.routes';
 import { kycRouter } from './kyc.routes';
 import { ecosystemPartnerRouter } from './ecosystemPartner.routes';
+import { chatRouter } from './chat.routes';
 
 export const apiRouter = Router();
 
@@ -19,6 +20,7 @@ apiRouter.use('/content', contentRouter);
 apiRouter.use('/user', userRouter);
 apiRouter.use('/admin', adminRouter);
 apiRouter.use('/public', publicRouter);
+apiRouter.use('/chat', chatRouter); // AI assistant (Groq), see lib/chatContext.ts
 
 // SIcoinX Core Financial & Platform Routes
 apiRouter.use('/wallet', walletRouter);

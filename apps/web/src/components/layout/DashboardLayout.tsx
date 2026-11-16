@@ -6,6 +6,7 @@ import { SiLogo } from '../common/SiLogo';
 import { DevMailboxModal } from '../common/DevMailboxModal';
 import { PageTransition } from '../common/animations/PageTransition';
 import { BottomNav } from './BottomNav';
+import { ChatAssistant } from '../chatbot/ChatAssistant';
 import {
   LayoutDashboard,
   PieChart,
@@ -299,6 +300,7 @@ export const DashboardLayout: React.FC = () => {
       <BottomNav />
 
       <DevMailboxModal />
+      <ChatAssistant />
     </div>
   );
 };

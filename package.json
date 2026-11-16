@@ -4,7 +4,8 @@
   "private": true,
   "workspaces": [
     "packages/*",
-    "apps/*"
+    "apps/api",
+    "apps/web"
   ],
   "scripts": {
     "dev": "concurrently -n \"api,web\" -c \"blue,green\" \"npm run dev -w apps/api\" \"npm run dev -w apps/web\"",
@@ -14,8 +15,9 @@
     "db:seed": "npm run db:seed -w apps/api",
     "db:generate": "npm run db:generate -w apps/api",
     "setup": "npm install && npm run build -w packages/shared && npm run db:generate -w apps/api && npm run db:migrate -w apps/api && npm run db:seed -w apps/api",
-    "mobile:analyze": "cd apps/mobile_app && flutter analyze",
-    "mobile:test": "cd apps/mobile_app && flutter test"
+    "mobile:start": "npm run start --prefix apps/mobile",
+    "mobile:typecheck": "npm run typecheck --prefix apps/mobile",
+    "mobile:test": "npm run test --prefix apps/mobile"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

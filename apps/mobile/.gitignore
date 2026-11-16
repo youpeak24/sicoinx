@@ -1,0 +1,23 @@
+node_modules/
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native builds are generated (Continuous Native Generation)
+/android
+/ios
+
+# Env
+.env
+.env.*
+!.env.example
+
+*.log
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+.DS_Store

@@ -27,6 +27,11 @@ export class RazorpayService {
     return process.env.RAZORPAY_KEY_SECRET || 'sicoinx_secret_demo_key';
   }
 
+  /** True when no live Razorpay credentials are configured (orders are simulated). */
+  public static isSandbox(): boolean {
+    return !(process.env.RAZORPAY_KEY_ID && !process.env.RAZORPAY_KEY_ID.includes('demo') && process.env.RAZORPAY_KEY_SECRET);
+  }
+
   /**
    * Create Razorpay payment order
    */

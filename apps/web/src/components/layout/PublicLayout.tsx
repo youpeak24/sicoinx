@@ -6,6 +6,7 @@ import { Footer } from '../common/Footer';
 import { DevMailboxModal } from '../common/DevMailboxModal';
 import { PageTransition } from '../common/animations/PageTransition';
 import { BottomNav } from './BottomNav';
+import { ChatAssistant } from '../chatbot/ChatAssistant';
 
 export const PublicLayout: React.FC = () => {
   return (
@@ -20,6 +21,7 @@ export const PublicLayout: React.FC = () => {
       <Footer />
       <BottomNav />
       <DevMailboxModal aboveBottomNav />
+      <ChatAssistant />
     </div>
   );
 };

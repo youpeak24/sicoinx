@@ -20,13 +20,11 @@ apps/api/prisma/*.db-journal
 # User uploads
 apps/api/uploads/
 
-# Flutter / Android (apps/mobile_app)
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-local.properties
-*.iml
-.gradle/
+# Expo / React Native (apps/mobile)
+.expo/
+expo-env.d.ts
+/apps/mobile/android/
+/apps/mobile/ios/
 
 # Vercel
 .vercel/
