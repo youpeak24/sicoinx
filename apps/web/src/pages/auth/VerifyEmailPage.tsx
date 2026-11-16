@@ -44,7 +44,7 @@ export const VerifyEmailPage: React.FC = () => {
         <div className="bg-white p-8 rounded-3xl border border-[#DFE8F5] shadow-card space-y-6">
           {status === 'loading' ? (
             <div className="text-center py-8 space-y-3">
-              <div className="w-8 h-8 border-4 border-[#175CFF] border-t-transparent rounded-full animate-spin mx-auto" />
+              <img src="/logo.png" alt="Loading" className="w-12 h-12 animate-pulse mx-auto" />
               <p className="text-xs text-[#64748B]">Validating cryptographic verification token...</p>
             </div>
           ) : status === 'success' ? (

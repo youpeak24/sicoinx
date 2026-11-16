@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { SiLogo } from './SiLogo';
 import { useAuth } from '../../context/AuthContext';
-import { Menu, X, ArrowUpRight, ShieldCheck, User, Sparkles } from 'lucide-react';
+import { useWallet } from '../../context/WalletContext';
+import { Menu, X, ArrowUpRight, ShieldCheck, User, Sparkles, ShoppingBag, Wallet } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const { user, isStaff } = useAuth();
+  const { coinBalance, referencePriceUsd } = useWallet();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,8 +24,8 @@ export const Navbar: React.FC = () => {
     { label: 'About', path: '/about' },
     { label: 'Ecosystem', path: '/ecosystem' },
     { label: 'Tokenomics', path: '/tokenomics' },
+    { label: 'Market & Graph', path: '/market' },
     { label: 'Roadmap', path: '/roadmap' },
-    { label: 'Market', path: '/market' },
     { label: 'Whitepaper', path: '/whitepaper' },
     { label: 'FAQ', path: '/faq' },
   ];
@@ -52,7 +54,7 @@ export const Navbar: React.FC = () => {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                className={`relative px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                   active
                     ? 'text-[#175CFF] font-semibold'
                     : 'text-[#64748B] hover:text-[#10213A] hover:bg-[#F7FAFF]'
@@ -69,6 +71,15 @@ export const Navbar: React.FC = () => {
 
         {/* Right Action Buttons */}
         <div className="hidden lg:flex items-center gap-3">
+          {/* Quick Buy SI Button */}
+          <Link
+            to={user ? '/dashboard/purchase' : '/buy'}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-extrabold text-white bg-gradient-to-r from-[#123B9A] via-[#175CFF] to-[#38BDF8] shadow-elevated hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5 active:scale-95"
+          >
+            <ShoppingBag className="w-3.5 h-3.5" />
+            <span>Buy SI (${referencePriceUsd.toFixed(2)})</span>
+          </Link>
+
           {user ? (
             <div className="flex items-center gap-3">
               {isStaff && (
@@ -85,7 +96,7 @@ export const Navbar: React.FC = () => {
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#175CFF] hover:bg-[#123B9A] shadow-elevated transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
               >
                 <User className="w-4 h-4" />
-                Dashboard
+                <span>Dashboard ({coinBalance.toFixed(0)} SI)</span>
               </Link>
             </div>
           ) : (
@@ -111,6 +122,13 @@ export const Navbar: React.FC = () => {
 
         {/* Mobile Menu Button with rotation animation */}
         <div className="flex lg:hidden items-center gap-2">
+          <Link
+            to={user ? '/dashboard/purchase' : '/buy'}
+            className="p-2 rounded-xl text-white bg-gradient-to-r from-[#175CFF] to-[#38BDF8] shadow-xs active:scale-95"
+            title="Buy SI"
+          >
+            <ShoppingBag className="w-4 h-4" />
+          </Link>
           {user && (
             <Link
               to="/dashboard"
@@ -122,7 +140,7 @@ export const Navbar: React.FC = () => {
           )}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-xl text-[#10213A] hover:bg-[#F7FAFF] transition-colors focus:outline-none"
+            className="p-2 rounded-xl text-[#10213A] hover:bg-[#F7FAFF] transition-colors focus:outline-none cursor-pointer"
             aria-label="Toggle Navigation Menu"
           >
             <div className="transition-transform duration-200">
@@ -153,6 +171,15 @@ export const Navbar: React.FC = () => {
           </nav>
 
           <div className="pt-4 border-t border-[#DFE8F5] flex flex-col gap-2">
+            <Link
+              to={user ? '/dashboard/purchase' : '/buy'}
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full text-center py-2.5 rounded-xl text-sm font-extrabold text-white bg-gradient-to-r from-[#123B9A] via-[#175CFF] to-[#38BDF8] shadow-elevated flex items-center justify-center gap-2"
+            >
+              <ShoppingBag className="w-4 h-4" />
+              <span>Purchase SI Coins</span>
+            </Link>
+
             {user ? (
               <>
                 <Link
@@ -160,7 +187,7 @@ export const Navbar: React.FC = () => {
                   onClick={() => setMobileMenuOpen(false)}
                   className="w-full text-center py-2.5 rounded-xl text-sm font-semibold text-white bg-[#175CFF] shadow-sm hover:bg-[#123B9A] transition-colors"
                 >
-                  Open Dashboard
+                  Open Dashboard ({coinBalance.toFixed(0)} SI)
                 </Link>
                 {isStaff && (
                   <Link

@@ -26,6 +26,10 @@ import {
   Menu,
   X,
   ShieldCheck,
+  CreditCard,
+  ArrowLeftRight,
+  BarChart3,
+  Key,
 } from 'lucide-react';
 
 export const AdminLayout: React.FC = () => {
@@ -37,7 +41,7 @@ export const AdminLayout: React.FC = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F7FAFF] text-[#64748B]">
-        <div className="w-8 h-8 border-4 border-[#175CFF] border-t-transparent rounded-full animate-spin" />
+        <img src="/logo.png" alt="Loading" className="w-14 h-14 animate-pulse" />
       </div>
     );
   }
@@ -72,6 +76,17 @@ export const AdminLayout: React.FC = () => {
   };
 
   const navSections = [
+    {
+      title: 'Digital Coin & Financials',
+      items: [
+        { label: 'KYC Approvals', path: '/admin/kyc', icon: ShieldCheck },
+        { label: 'Buy / Sell Orders', path: '/admin/orders', icon: ArrowLeftRight },
+        { label: 'Wallet Management', path: '/admin/wallets', icon: Coins },
+        { label: 'Payment Monitoring', path: '/admin/payments', icon: CreditCard },
+        { label: 'Reports & Analytics', path: '/admin/analytics', icon: BarChart3 },
+        { label: 'Ecosystem Partner APIs', path: '/admin/partners', icon: Key },
+      ],
+    },
     {
       title: 'Core Telemetry',
       items: [

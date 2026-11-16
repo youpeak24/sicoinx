@@ -152,8 +152,8 @@ export const HomePage: React.FC = () => {
                   {/* Top Badge */}
                   <div className="flex items-center justify-between pb-4 border-b border-[#DFE8F5]">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#175CFF] to-[#123B9A] p-2 flex items-center justify-center shadow-xs transition-transform duration-300 hover:rotate-6">
-                        <img src="/si-monogram.svg" alt="SI" className="w-full h-full object-contain" />
+                      <div className="w-10 h-10 flex items-center justify-center transition-transform duration-300 hover:rotate-6">
+                        <img src="/logo.png" alt="SI Coin" className="w-full h-full object-contain" />
                       </div>
                       <div>
                         <h2 className="font-bold text-sm text-[#10213A]">SI Coin Reference Feed</h2>

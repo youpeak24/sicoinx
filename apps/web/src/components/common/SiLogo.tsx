@@ -23,7 +23,7 @@ export const SiLogo: React.FC<SiLogoProps> = ({ size = 'md', showText = true, cl
   return (
     <Link to="/" className={`inline-flex items-center gap-2.5 focus:outline-none group ${className}`}>
       <div className={`${iconSizes[size]} transition-transform duration-200 group-hover:scale-105 flex-shrink-0`}>
-        <img src="/si-monogram.svg" alt="SI Coin Monogram" className="w-full h-full object-contain" />
+        <img src="/logo.png" alt="SI Coin" className="w-full h-full object-contain" draggable={false} />
       </div>
       {showText && (
         <div className="flex flex-col">

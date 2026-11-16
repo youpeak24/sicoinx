@@ -230,14 +230,44 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const refreshWallet = async () => {
     setIsLoading(true);
     try {
-      // Try fetching portfolio from API if available
-      const portfolioData = await api.get('/user/portfolio');
-      if (portfolioData?.simulatedTestnetLedger?.balanceSi) {
-        const remoteSi = parseFloat(portfolioData.simulatedTestnetLedger.balanceSi);
-        if (!isNaN(remoteSi) && remoteSi > 0) {
-          // If remote is higher or present, reflect
-          setCoinBalance((prev) => Math.max(prev, remoteSi));
+      // Fetch live wallet data from backend
+      const walletRes = await api.get('/wallet');
+      if (walletRes && walletRes.wallet) {
+        setCoinBalance(parseFloat(walletRes.wallet.coinBalance));
+        if (walletRes.wallet.address) {
+          localStorage.setItem(`${storageKey}_address`, walletRes.wallet.address);
         }
+      }
+
+      // Fetch live KYC status
+      const kycRes = await api.get('/kyc/status');
+      if (kycRes && kycRes.status) {
+        setKyc({
+          status: kycRes.status === 'APPROVED' ? 'VERIFIED' : kycRes.status === 'PENDING' ? 'PENDING' : 'UNVERIFIED',
+          fullName: kycRes.fullName,
+          idType: kycRes.idType,
+          idNumber: kycRes.idNumber,
+          submittedAt: kycRes.submittedAt,
+          tier: kycRes.status === 'APPROVED' ? 2 : 1,
+        });
+      }
+
+      // Fetch live transactions
+      const txRes = await api.get('/wallet/transactions');
+      if (txRes && txRes.transactions && txRes.transactions.length > 0) {
+        setTransactions(
+          txRes.transactions.map((t: any) => ({
+            id: t.id,
+            txHash: t.txHash,
+            type: t.type,
+            title: t.description,
+            coinAmount: t.coinAmount,
+            fiatValueUsd: t.fiatAmount || '$0.00',
+            timestamp: t.createdAt,
+            status: t.status,
+            counterparty: t.type,
+          }))
+        );
       }
     } catch {
       // Graceful fallback to local state

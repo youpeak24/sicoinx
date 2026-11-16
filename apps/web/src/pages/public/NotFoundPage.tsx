@@ -7,6 +7,7 @@ export const NotFoundPage: React.FC = () => {
     <div className="max-w-xl mx-auto px-4 py-32 text-center space-y-6 animate-fade-in relative overflow-hidden">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-[#175CFF]/10 rounded-full blur-3xl -z-10 pointer-events-none animate-blob" />
 
+      <img src="/logo.png" alt="SI Coin" className="w-16 h-16 mx-auto" />
       <span className="text-6xl sm:text-8xl font-extrabold text-[#175CFF] tracking-tight block animate-float">
         404
       </span>

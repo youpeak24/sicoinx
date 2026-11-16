@@ -30,6 +30,9 @@ import { VerifyEmailPage } from './pages/auth/VerifyEmailPage';
 
 // Dashboard Pages
 import { DashboardOverview } from './pages/dashboard/DashboardOverview';
+import { PurchasingPage } from './pages/dashboard/PurchasingPage';
+import { CoinStatusPage } from './pages/dashboard/CoinStatusPage';
+import { ProfilePage } from './pages/dashboard/ProfilePage';
 import { PortfolioPage } from './pages/dashboard/PortfolioPage';
 import { ActivityPage } from './pages/dashboard/ActivityPage';
 import { WalletsPage } from './pages/dashboard/WalletsPage';
@@ -38,6 +41,12 @@ import { SupportPage } from './pages/dashboard/SupportPage';
 import { SupportDetailPage } from './pages/dashboard/SupportDetailPage';
 import { SettingsPage } from './pages/dashboard/SettingsPage';
 import { SecurityPage } from './pages/dashboard/SecurityPage';
+import { BuyCoinsPage } from './pages/dashboard/BuyCoinsPage';
+import { SellCoinsPage } from './pages/dashboard/SellCoinsPage';
+import { TransfersPage } from './pages/dashboard/TransfersPage';
+import { TransactionsPage } from './pages/dashboard/TransactionsPage';
+import { PaymentsPage } from './pages/dashboard/PaymentsPage';
+import { KycPage } from './pages/dashboard/KycPage';
 
 // Admin Pages
 import { AdminOverview } from './pages/admin/AdminOverview';
@@ -55,6 +64,12 @@ import { AdminSubscribers } from './pages/admin/AdminSubscribers';
 import { AdminRoles } from './pages/admin/AdminRoles';
 import { AdminAuditLogs } from './pages/admin/AdminAuditLogs';
 import { AdminSettings } from './pages/admin/AdminSettings';
+import { AdminKycPage } from './pages/admin/AdminKycPage';
+import { AdminOrdersPage } from './pages/admin/AdminOrdersPage';
+import { AdminWalletsPage } from './pages/admin/AdminWalletsPage';
+import { AdminPaymentsPage } from './pages/admin/AdminPaymentsPage';
+import { AdminAnalyticsPage } from './pages/admin/AdminAnalyticsPage';
+import { AdminPartnersPage } from './pages/admin/AdminPartnersPage';
 
 export const App: React.FC = () => {
   return (
@@ -67,6 +82,8 @@ export const App: React.FC = () => {
         <Route path="/tokenomics" element={<TokenomicsPage />} />
         <Route path="/roadmap" element={<RoadmapPage />} />
         <Route path="/market" element={<MarketPage />} />
+        <Route path="/buy" element={<PurchasingPage />} />
+        <Route path="/purchase" element={<PurchasingPage />} />
         <Route path="/whitepaper" element={<WhitepaperPage />} />
         <Route path="/announcements" element={<AnnouncementsPage />} />
         <Route path="/announcements/:slug" element={<AnnouncementDetailPage />} />
@@ -86,9 +103,18 @@ export const App: React.FC = () => {
       {/* User Dashboard */}
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<DashboardOverview />} />
+        <Route path="buy" element={<BuyCoinsPage />} />
+        <Route path="purchase" element={<BuyCoinsPage />} />
+        <Route path="sell" element={<SellCoinsPage />} />
+        <Route path="transfers" element={<TransfersPage />} />
+        <Route path="transactions" element={<TransactionsPage />} />
+        <Route path="payments" element={<PaymentsPage />} />
+        <Route path="kyc" element={<KycPage />} />
+        <Route path="market" element={<CoinStatusPage />} />
+        <Route path="profile" element={<ProfilePage />} />
+        <Route path="wallets" element={<WalletsPage />} />
         <Route path="portfolio" element={<PortfolioPage />} />
         <Route path="activity" element={<ActivityPage />} />
-        <Route path="wallets" element={<WalletsPage />} />
         <Route path="notifications" element={<NotificationsPage />} />
         <Route path="support" element={<SupportPage />} />
         <Route path="support/:id" element={<SupportDetailPage />} />
@@ -99,6 +125,12 @@ export const App: React.FC = () => {
       {/* Administration Panel */}
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<AdminOverview />} />
+        <Route path="kyc" element={<AdminKycPage />} />
+        <Route path="orders" element={<AdminOrdersPage />} />
+        <Route path="wallets" element={<AdminWalletsPage />} />
+        <Route path="payments" element={<AdminPaymentsPage />} />
+        <Route path="analytics" element={<AdminAnalyticsPage />} />
+        <Route path="partners" element={<AdminPartnersPage />} />
         <Route path="coin" element={<AdminCoinConfig />} />
         <Route path="pricing" element={<AdminPricing />} />
         <Route path="price-history" element={<AdminPriceHistory />} />
