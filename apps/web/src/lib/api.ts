@@ -74,6 +74,12 @@ export async function request<T = any>(
     throw new ApiError(errorMsg, errorCode, response.status, data?.error?.details);
   }
 
+  // A 2xx response that isn't JSON means the request never reached the API
+  // (e.g. SPA fallback HTML, a placeholder rewrite or a login wall).
+  if (typeof data === 'string') {
+    throw new ApiError(API_UNREACHABLE_MESSAGE, 'API_UNREACHABLE', response.status);
+  }
+
   return (data?.data !== undefined ? data.data : data) as T;
 }
 
