@@ -1,0 +1,540 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id              String             @id @default(uuid())
+  email           String             @unique
+  passwordHash    String
+  name            String
+  role            String             @default("USER") // SUPER_ADMIN, FINANCE_MANAGER, CONTENT_EDITOR, SUPPORT_AGENT, READONLY_ANALYST, USER
+  isEmailVerified Boolean            @default(false)
+  mfaSecret       String?
+  mfaEnabled      Boolean            @default(false)
+  avatarUrl       String?
+  isBanned        Boolean            @default(false)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  sessions           Session[]
+  tokens             VerificationToken[]
+  wallets            WalletLink[]
+  notifications      Notification[]
+  tickets            SupportTicket[]
+  ledgerEntries      SimulatedLedgerEntry[]
+  sicoinWallet       Wallet?
+  kyc                KycVerification?
+  buyOrders          BuyOrder[]
+  sellOrders         SellOrder[]
+  transfersSent      EcosystemTransfer[]  @relation("SentTransfers")
+  transfersReceived  EcosystemTransfer[]  @relation("ReceivedTransfers")
+  payments           PaymentRecord[]
+  transactions       TransactionRecord[]
+
+  @@index([email])
+  @@index([role])
+}
+
+model Session {
+  id         String   @id @default(uuid())
+  userId     String
+  token      String   @unique
+  ipAddress  String?
+  userAgent  String?
+  expiresAt  DateTime
+  isRevoked  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
+model VerificationToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  type      String   // EMAIL_VERIFICATION, PASSWORD_RESET, WALLET_CHALLENGE
+  expiresAt DateTime
+  isUsed    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
+model WalletLink {
+  id         String    @id @default(uuid())
+  userId     String
+  address    String
+  chain      String    @default("Ethereum (Sepolia/Mainnet)")
+  isVerified Boolean   @default(false)
+  verifiedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, address])
+  @@index([userId])
+  @@index([address])
+}
+
+model CoinConfiguration {
+  id                String   @id @default("default-coin")
+  tokenName         String   @default("SI Coin")
+  ticker            String   @default("SI")
+  decimals          Int      @default(6)
+  blockchainNetwork String   @default("Ethereum (Planned ERC-20) / Sepolia Testnet Preview")
+  contractAddress   String?
+  explorerUrl       String?
+  totalSupply       String   @default("100000000")
+  circulatingSupply String   @default("18500000")
+  maxSupply         String?  @default("100000000")
+  buyPriceInr       String   @default("105.00")
+  sellPriceInr      String   @default("100.00")
+  inrPerUsd         String   @default("84.00")
+  minBuyCoins       String   @default("1")
+  maxBuyCoins       String   @default("100000")
+  minSellCoins      String   @default("1")
+  maxSellCoins      String   @default("50000")
+  reserveSupply     String   @default("81500000")
+  enableBuying      Boolean  @default(true)
+  enableSelling     Boolean  @default(true)
+  enableTransfers   Boolean  @default(true)
+  whitepaperUrl     String?  @default("/whitepaper")
+  projectStatus     String   @default("ACTIVE_DEVELOPMENT")
+  officialEmail     String   @default("info@sicoin.org")
+  updatedAt         DateTime @updatedAt
+}
+
+model PriceSourceConfiguration {
+  id                     String    @id @default("default-price-config")
+  activeSource           String    @default("MANUAL") // MANUAL, EXTERNAL_COINGECKO, EXTERNAL_COINCAP, DEMO
+  staleThresholdMinutes  Int       @default(60)
+  externalProviderApiKey String?
+  pollingIntervalSeconds Int       @default(30)
+  lastSuccessfulPoll     DateTime?
+  externalEndpoint       String?
+  demoVariancePercent    Float     @default(1.5)
+  updatedAt              DateTime  @updatedAt
+}
+
+model PriceObservation {
+  id                  String   @id @default(uuid())
+  priceUsd            String
+  quoteCurrency       String   @default("USD")
+  source              String   // MANUAL, EXTERNAL_COINGECKO, EXTERNAL_COINCAP, DEMO
+  sourceLabel         String   // e.g. "Administrator-set reference price", "CoinGecko API", "Demonstration feed"
+  effectiveTimestamp  DateTime
+  recordedTimestamp   DateTime @default(now())
+  actorEmail          String?
+  changeReason        String?
+  isCorrection        Boolean  @default(false)
+  supersededRecordId  String?
+  isDemoData          Boolean  @default(false)
+
+  @@index([effectiveTimestamp])
+  @@index([source])
+}
+
+model ScheduledPriceChange {
+  id                String    @id @default(uuid())
+  scheduledPriceUsd String
+  scheduledTime     DateTime
+  reason            String
+  createdById       String
+  createdByEmail    String
+  isExecuted        Boolean   @default(false)
+  isCancelled       Boolean   @default(false)
+  executedAt        DateTime?
+  createdAt         DateTime  @default(now())
+
+  @@index([scheduledTime])
+  @@index([isExecuted])
+}
+
+model TokenAllocation {
+  id                 String  @id @default(uuid())
+  category           String
+  percentage         Float
+  tokenAmount        String
+  vestingDescription String
+  unlockSchedule     String
+  colorHex           String  @default("#175CFF")
+  displayOrder       Int     @default(0)
+}
+
+model EcosystemModule {
+  id               String  @id @default(uuid())
+  title            String
+  slug             String  @unique
+  description      String
+  category         String
+  status           String  @default("PLANNED") // AVAILABLE, IN_DEVELOPMENT, PLANNED
+  badgeText        String?
+  documentationUrl String?
+  appUrl           String?
+  iconName         String  @default("Box")
+  displayOrder     Int     @default(0)
+  isPublic         Boolean @default(true)
+
+  @@index([displayOrder])
+}
+
+model RoadmapMilestone {
+  id               String  @id @default(uuid())
+  phaseNumber      String
+  phaseTitle       String
+  targetPeriod     String
+  status           String  @default("PLANNED") // COMPLETED, IN_PROGRESS, PLANNED
+  milestonesJson   String  // JSON array of milestones
+  details          String
+  isTargetEstimate Boolean @default(true)
+  displayOrder     Int     @default(0)
+
+  @@index([displayOrder])
+}
+
+model PageContent {
+  id              String    @id @default(uuid())
+  pageKey         String    @unique // e.g. "home", "about", "whitepaper"
+  title           String
+  metaDescription String?
+  sectionsJson    String    // Structured JSON for hero, features, etc.
+  revisionNumber  Int       @default(1)
+  status          String    @default("PUBLISHED") // DRAFT, PUBLISHED
+  publishedAt     DateTime?
+  updatedAt       DateTime  @updatedAt
+}
+
+model PageRevision {
+  id              String   @id @default(uuid())
+  pageKey         String
+  revisionNumber  Int
+  title           String
+  metaDescription String?
+  sectionsJson    String
+  createdById     String?
+  createdByEmail  String?
+  createdAt       DateTime @default(now())
+
+  @@index([pageKey, revisionNumber])
+}
+
+model Announcement {
+  id               String    @id @default(uuid())
+  title            String
+  slug             String    @unique
+  summary          String
+  content          String
+  category         String    @default("General")
+  publishedAt      DateTime?
+  expiresAt        DateTime?
+  isPinned         Boolean   @default(false)
+  isFeaturedBanner Boolean   @default(false)
+  status           String    @default("DRAFT") // DRAFT, PUBLISHED, ARCHIVED
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([status])
+  @@index([publishedAt])
+}
+
+model FaqItem {
+  id           String   @id @default(uuid())
+  question     String
+  answer       String
+  category     String   @default("General")
+  displayOrder Int      @default(0)
+  isPublished  Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([category, displayOrder])
+}
+
+model MediaAsset {
+  id           String   @id @default(uuid())
+  filename     String
+  originalName String
+  mimeType     String
+  sizeBytes    Int
+  urlPath      String
+  uploadedById String?
+  createdAt    DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  message   String
+  type      String   @default("INFO") // INFO, SUCCESS, WARNING, ALERT
+  isRead    Boolean  @default(false)
+  linkUrl   String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+}
+
+model SupportTicket {
+  id            String   @id @default(uuid())
+  userId        String
+  userEmail     String
+  userName      String
+  subject       String
+  category      String   @default("General Inquiry")
+  priority      String   @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+  status        String   @default("OPEN")   // OPEN, IN_PROGRESS, RESOLVED, CLOSED
+  messagesCount Int      @default(1)
+  lastReplyAt   DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages SupportMessage[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model SupportMessage {
+  id          String   @id @default(uuid())
+  ticketId    String
+  authorId    String
+  authorEmail String
+  authorName  String
+  authorRole  String   @default("USER")
+  content     String
+  createdAt   DateTime @default(now())
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+}
+
+model NewsletterSubscriber {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  subscribedAt DateTime @default(now())
+  isActive     Boolean  @default(true)
+}
+
+model AuditEvent {
+  id         String   @id @default(uuid())
+  actorId    String?
+  actorEmail String?
+  actorRole  String?
+  action     String   // e.g. "UPDATE_PRICE", "PUBLISH_ANNOUNCEMENT", "UPDATE_COIN_CONFIG"
+  entityType String   // "PriceObservation", "CoinConfiguration", "User", "TokenAllocation"
+  entityId   String?
+  details    String?  // JSON string
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([action])
+  @@index([entityType])
+  @@index([createdAt])
+}
+
+model SimulatedLedgerEntry {
+  id           String   @id @default(uuid())
+  userId       String
+  type         String   // DEMO_TESTNET_ALLOCATION, SIMULATED_STAKE_PREVIEW, FAUCET
+  amount       String   // e.g. "500.000000"
+  balanceAfter String
+  reference    String   // Description or testnet tx mock
+  status       String   @default("CONFIRMED") // SUBMITTED, PENDING, CONFIRMED, FAILED
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Wallet {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  address     String   @unique // e.g. SICX-A8F2-990B-4E11
+  coinBalance String   @default("0.000000") // Decimal.js string
+  inrBalance  String   @default("0.00")     // Decimal.js string
+  isFrozen    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([address])
+}
+
+model KycVerification {
+  id               String    @id @default(uuid())
+  userId           String    @unique
+  fullName         String
+  idType           String    // AADHAAR, PAN, PASSPORT, DRIVING_LICENSE
+  idNumber         String
+  documentFrontUrl String
+  documentBackUrl  String?
+  selfieUrl        String?
+  status           String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  rejectionReason  String?
+  reviewedById     String?
+  reviewedByEmail  String?
+  reviewedAt       DateTime?
+  submittedAt      DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+}
+
+model BuyOrder {
+  id               String   @id @default(uuid())
+  orderNumber      String   @unique // e.g. ORD-BUY-10001
+  userId           String
+  coinAmount       String   // e.g. "100.000000"
+  pricePerCoinInr  String   // e.g. "105.00"
+  totalInr         String   // e.g. "10500.00"
+  paymentMethod    String   // RAZORPAY_UPI, RAZORPAY_CARD, RAZORPAY_NETBANKING
+  gatewayOrderId   String?  // Razorpay order_id
+  gatewayPaymentId String?  // Razorpay pay_id
+  status           String   @default("PENDING") // PENDING, COMPLETED, FAILED, REFUNDED
+  receiptNumber    String   @unique // e.g. REC-BUY-10001
+  failureReason    String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([gatewayOrderId])
+}
+
+model SellOrder {
+  id              String    @id @default(uuid())
+  orderNumber     String    @unique // e.g. ORD-SELL-10001
+  userId          String
+  coinAmount      String    // e.g. "50.000000"
+  pricePerCoinInr String    // e.g. "100.00"
+  totalInr        String    // e.g. "5000.00"
+  bankAccountName String
+  bankName        String
+  accountNumber   String
+  ifscCode        String
+  status          String    @default("PENDING") // PENDING, APPROVED, SETTLED, REJECTED
+  rejectionReason String?
+  settlementUtr   String?   // Bank reference / UTR number
+  settledAt       DateTime?
+  receiptNumber   String    @unique // e.g. REC-SELL-10001
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+}
+
+model EcosystemTransfer {
+  id                   String   @id @default(uuid())
+  transferNumber       String   @unique // e.g. TRF-10001
+  senderId             String
+  senderWalletAddress  String
+  destinationType      String   // INTERNAL_USER, ECOSYSTEM_APP
+  destinationApp       String?  // YOUPEAK, YOUPEAK_ECOMMERCE, OTHER
+  recipientEmail       String?
+  recipientWalletAddress String?
+  recipientUserId      String?
+  coinAmount           String
+  note                 String?
+  status               String   @default("CONFIRMED") // CONFIRMED, FAILED
+  createdAt            DateTime @default(now())
+
+  sender    User  @relation("SentTransfers", fields: [senderId], references: [id], onDelete: Cascade)
+  recipient User? @relation("ReceivedTransfers", fields: [recipientUserId], references: [id], onDelete: SetNull)
+
+  @@index([senderId])
+  @@index([recipientUserId])
+  @@index([destinationType])
+}
+
+model PaymentRecord {
+  id               String   @id @default(uuid())
+  userId           String
+  buyOrderId       String?
+  gateway          String   @default("RAZORPAY")
+  gatewayOrderId   String
+  gatewayPaymentId String?
+  gatewaySignature String?
+  amountInr        String
+  currency         String   @default("INR")
+  method           String   @default("UPI") // UPI, CARD, NETBANKING
+  status           String   @default("CREATED") // CREATED, AUTHORIZED, CAPTURED, FAILED, REFUNDED
+  refundId         String?
+  refundAmount     String?
+  refundReason     String?
+  receiptNumber    String?
+  failureMessage   String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([gatewayOrderId])
+  @@index([status])
+}
+
+model TransactionRecord {
+  id           String   @id @default(uuid())
+  txHash       String   @unique // 0x...
+  userId       String
+  walletId     String
+  type         String   // BUY_COIN, SELL_COIN, TRANSFER_OUT, TRANSFER_IN, ECOSYSTEM_DEBIT, ECOSYSTEM_CREDIT, ADMIN_CREDIT, ADMIN_DEBIT, REFUND
+  coinAmount   String   // e.g. "+100.000000" or "-50.000000"
+  fiatAmount   String?  // e.g. "10500.00 INR"
+  balanceAfter String   // Balance at time of tx
+  description  String
+  referenceId  String?  // BuyOrder id, SellOrder id, or Transfer id
+  status       String   @default("CONFIRMED") // CONFIRMED, PENDING, FAILED
+  metadataJson String?
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([walletId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model EcosystemPartner {
+  id          String   @id @default(uuid())
+  appName     String   // e.g. YouPeak, YouPeak E-Commerce
+  slug        String   @unique // youpeak, youpeak-ecommerce
+  apiKey      String   @unique
+  apiSecret   String
+  webhookUrl  String?
+  status      String   @default("ACTIVE") // ACTIVE, SUSPENDED
+  permissions String   @default("read_balance,debit,credit,transfer")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([slug])
+  @@index([apiKey])
+}

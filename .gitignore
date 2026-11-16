@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Environment files (keep .env.example)
+.env
+.env.*
+!.env.example
+
+# Local databases (SQLite)
+*.db
+*.db-journal
+apps/api/prisma/*.db
+apps/api/prisma/*.db-journal
+
+# User uploads
+apps/api/uploads/
+
+# Vercel
+.vercel/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Test / coverage
+coverage/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

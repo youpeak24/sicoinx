@@ -1,0 +1,198 @@
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { SiLogo } from './SiLogo';
+import { useAuth } from '../../context/AuthContext';
+import { Menu, X, ArrowUpRight, ShieldCheck, User, Sparkles } from 'lucide-react';
+
+export const Navbar: React.FC = () => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const location = useLocation();
+  const { user, isStaff } = useAuth();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const navLinks = [
+    { label: 'About', path: '/about' },
+    { label: 'Ecosystem', path: '/ecosystem' },
+    { label: 'Tokenomics', path: '/tokenomics' },
+    { label: 'Roadmap', path: '/roadmap' },
+    { label: 'Market', path: '/market' },
+    { label: 'Whitepaper', path: '/whitepaper' },
+    { label: 'FAQ', path: '/faq' },
+  ];
+
+  const isActive = (path: string) => location.pathname === path;
+
+  return (
+    <header
+      className={`sticky top-0 z-40 transition-all duration-300 ${
+        isScrolled
+          ? 'bg-white/95 backdrop-blur-lg shadow-card border-b border-[#DFE8F5]'
+          : 'bg-white/80 backdrop-blur-md border-b border-[#DFE8F5]/60'
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        {/* Logo with hover scale */}
+        <div className="transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]">
+          <SiLogo size="md" />
+        </div>
+
+        {/* Desktop Navigation Links with animated indicator */}
+        <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
+          {navLinks.map((link) => {
+            const active = isActive(link.path);
+            return (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={`relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  active
+                    ? 'text-[#175CFF] font-semibold'
+                    : 'text-[#64748B] hover:text-[#10213A] hover:bg-[#F7FAFF]'
+                }`}
+              >
+                {link.label}
+                {active && (
+                  <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-[#175CFF] rounded-full animate-fade-in shadow-xs" />
+                )}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Right Action Buttons */}
+        <div className="hidden lg:flex items-center gap-3">
+          {user ? (
+            <div className="flex items-center gap-3">
+              {isStaff && (
+                <Link
+                  to="/admin"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#EDF4FF] text-[#123B9A] hover:bg-[#DFE8F5] border border-[#DFE8F5] transition-all duration-200 hover:-translate-y-0.5 shadow-xs"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#175CFF]" />
+                  Admin Panel
+                </Link>
+              )}
+              <Link
+                to="/dashboard"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#175CFF] hover:bg-[#123B9A] shadow-elevated transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
+              >
+                <User className="w-4 h-4" />
+                Dashboard
+              </Link>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <Link
+                to="/login"
+                className="px-4 py-2 text-sm font-semibold text-[#10213A] hover:text-[#175CFF] transition-colors duration-200"
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/register"
+                className="relative overflow-hidden inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#175CFF] hover:bg-[#123B9A] shadow-elevated transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] group"
+              >
+                <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out pointer-events-none" />
+                <Sparkles className="w-3.5 h-3.5 text-white/80" />
+                <span>Get Started</span>
+                <ArrowUpRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Mobile Menu Button with rotation animation */}
+        <div className="flex lg:hidden items-center gap-2">
+          {user && (
+            <Link
+              to="/dashboard"
+              className="p-2 rounded-xl text-[#175CFF] bg-[#EDF4FF] transition-transform active:scale-95"
+              title="Dashboard"
+            >
+              <User className="w-5 h-5" />
+            </Link>
+          )}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 rounded-xl text-[#10213A] hover:bg-[#F7FAFF] transition-colors focus:outline-none"
+            aria-label="Toggle Navigation Menu"
+          >
+            <div className="transition-transform duration-200">
+              {mobileMenuOpen ? <X className="w-6 h-6 rotate-90" /> : <Menu className="w-6 h-6" />}
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Drawer with smooth animation */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden border-b border-[#DFE8F5] bg-white/95 backdrop-blur-xl px-4 pt-3 pb-6 space-y-3 animate-fade-in-down shadow-xl">
+          <nav className="flex flex-col space-y-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`px-3.5 py-2.5 rounded-xl text-base font-medium transition-colors ${
+                  isActive(link.path)
+                    ? 'text-[#175CFF] bg-[#EDF4FF] font-semibold'
+                    : 'text-[#64748B] hover:text-[#10213A] hover:bg-[#F7FAFF]'
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="pt-4 border-t border-[#DFE8F5] flex flex-col gap-2">
+            {user ? (
+              <>
+                <Link
+                  to="/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full text-center py-2.5 rounded-xl text-sm font-semibold text-white bg-[#175CFF] shadow-sm hover:bg-[#123B9A] transition-colors"
+                >
+                  Open Dashboard
+                </Link>
+                {isStaff && (
+                  <Link
+                    to="/admin"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full text-center py-2.5 rounded-xl text-sm font-semibold text-[#123B9A] bg-[#EDF4FF] border border-[#DFE8F5] hover:bg-[#DFE8F5] transition-colors"
+                  >
+                    Go to Admin Panel
+                  </Link>
+                )}
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full text-center py-2.5 rounded-xl text-sm font-semibold text-[#10213A] border border-[#DFE8F5] hover:bg-[#F7FAFF] transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/register"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full text-center py-2.5 rounded-xl text-sm font-semibold text-white bg-[#175CFF] shadow-elevated hover:bg-[#123B9A] transition-colors"
+                >
+                  Create Account
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </header>
+  );
+};

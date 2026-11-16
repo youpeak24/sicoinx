@@ -1,0 +1,87 @@
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: {
+    code: string;
+    message: string;
+    details?: any;
+    requestId?: string;
+  };
+  message?: string;
+  requireMfa?: boolean;
+}
+
+export class ApiError extends Error {
+  code: string;
+  details?: any;
+  status: number;
+
+  constructor(message: string, code: string = 'ERROR', status: number = 400, details?: any) {
+    super(message);
+    this.name = 'ApiError';
+    this.code = code;
+    this.status = status;
+    this.details = details;
+  }
+}
+
+const BASE_URL = '/api/v1';
+
+export async function request<T = any>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const url = endpoint.startsWith('http') ? endpoint : `${BASE_URL}${endpoint}`;
+  
+  const headers = new Headers(options.headers || {});
+  if (!headers.has('Content-Type') && !(options.body instanceof FormData)) {
+    headers.set('Content-Type', 'application/json');
+  }
+
+  const response = await fetch(url, {
+    ...options,
+    headers,
+    credentials: 'include', // Includes session cookie
+  });
+
+  let data: any;
+  const contentType = response.headers.get('content-type');
+  if (contentType && contentType.includes('application/json')) {
+    data = await response.json();
+  } else {
+    data = await response.text();
+  }
+
+  if (!response.ok) {
+    const errorMsg = data?.error?.message || response.statusText || 'An error occurred';
+    const errorCode = data?.error?.code || `HTTP_${response.status}`;
+    throw new ApiError(errorMsg, errorCode, response.status, data?.error?.details);
+  }
+
+  return (data?.data !== undefined ? data.data : data) as T;
+}
+
+export const api = {
+  get: <T = any>(endpoint: string, options?: RequestInit) =>
+    request<T>(endpoint, { ...options, method: 'GET' }),
+  post: <T = any>(endpoint: string, body?: any, options?: RequestInit) =>
+    request<T>(endpoint, {
+      ...options,
+      method: 'POST',
+      body: body instanceof FormData ? body : JSON.stringify(body),
+    }),
+  put: <T = any>(endpoint: string, body?: any, options?: RequestInit) =>
+    request<T>(endpoint, {
+      ...options,
+      method: 'PUT',
+      body: body instanceof FormData ? body : JSON.stringify(body),
+    }),
+  patch: <T = any>(endpoint: string, body?: any, options?: RequestInit) =>
+    request<T>(endpoint, {
+      ...options,
+      method: 'PATCH',
+      body: body instanceof FormData ? body : JSON.stringify(body),
+    }),
+  delete: <T = any>(endpoint: string, options?: RequestInit) =>
+    request<T>(endpoint, { ...options, method: 'DELETE' }),
+};
