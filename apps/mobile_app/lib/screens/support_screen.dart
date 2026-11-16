@@ -111,7 +111,9 @@ class _SupportScreenState extends State<SupportScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('Submit Ticket'),
+                child: _creating
+                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : const Text('Submit Ticket'),
               ),
             ],
           ),
@@ -148,7 +150,7 @@ class _SupportScreenState extends State<SupportScreen> {
               : ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: _tickets.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  separatorBuilder: (context, index) => const SizedBox(height: 10),
                   itemBuilder: (context, i) {
                     final t = _tickets[i];
                     return Container(

@@ -110,7 +110,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                   : ListView.separated(
                       padding: const EdgeInsets.all(16),
                       itemCount: _transactions.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      separatorBuilder: (context, index) => const SizedBox(height: 8),
                       itemBuilder: (context, i) {
                         final tx = _transactions[i];
                         final isPositive = (tx['coinAmount'] ?? '').toString().startsWith('+');
