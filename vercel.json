@@ -2,8 +2,8 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "installCommand": "[ -d packages/shared ] || cd ../..; npm install",
-  "buildCommand": "[ -d packages/shared ] || cd ../..; npm run build -w @sicoin/shared && npm run build -w @sicoin/web",
-  "outputDirectory": "apps/web/dist",
+  "buildCommand": "if [ -f scripts/vercel-build.sh ]; then sh scripts/vercel-build.sh; else sh ../../scripts/vercel-build.sh; fi",
+  "outputDirectory": "dist",
   "rewrites": [
     { "source": "/api/:path*", "destination": "https://YOUR-API-HOST.example.com/api/:path*" },
     { "source": "/uploads/:path*", "destination": "https://YOUR-API-HOST.example.com/uploads/:path*" },

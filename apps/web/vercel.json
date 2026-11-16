@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "vite",
   "installCommand": "cd ../.. && npm install",
-  "buildCommand": "cd ../.. && npm run build -w @sicoin/shared && npm run build -w @sicoin/web",
+  "buildCommand": "sh ../../scripts/vercel-build.sh",
   "outputDirectory": "dist",
   "rewrites": [
     { "source": "/api/:path*", "destination": "https://YOUR-API-HOST.example.com/api/:path*" },
