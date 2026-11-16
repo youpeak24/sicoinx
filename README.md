@@ -121,9 +121,9 @@ The local database comes seeded with role-specific accounts for testing:
 
 ## 📚 In-Depth Documentation
 
-- 🏛️ **[System Architecture Guide](file:///d:/SICOINX/docs/ARCHITECTURE.md)**: Monorepo design, non-custodial boundaries, data provenance, and exact decimal arithmetic engine.
-- 📡 **[REST API Specification](file:///d:/SICOINX/docs/API.md)**: Complete endpoint documentation, request/response schemas, and Swagger UI integration.
-- 🛠️ **[Operations & Runbook](file:///d:/SICOINX/docs/RUNBOOK.md)**: Local development setup, Docker multi-container deployment, environment variables, and troubleshooting.
+- 🏛️ **[System Architecture Guide](docs/ARCHITECTURE.md)**: Monorepo design, non-custodial boundaries, data provenance, and exact decimal arithmetic engine.
+- 📡 **[REST API Specification](docs/API.md)**: Complete endpoint documentation, request/response schemas, and Swagger UI integration.
+- 🛠️ **[Operations & Runbook](docs/RUNBOOK.md)**: Local development setup, Docker multi-container deployment, environment variables, and troubleshooting.
 
 ---
 
@@ -143,4 +143,4 @@ npm run build -w apps/web
 ---
 
 ## 📄 License
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.

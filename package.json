@@ -13,7 +13,9 @@
     "db:migrate": "npm run db:migrate -w apps/api",
     "db:seed": "npm run db:seed -w apps/api",
     "db:generate": "npm run db:generate -w apps/api",
-    "setup": "npm install && npm run build -w packages/shared && npm run db:generate -w apps/api && npm run db:migrate -w apps/api && npm run db:seed -w apps/api"
+    "setup": "npm install && npm run build -w packages/shared && npm run db:generate -w apps/api && npm run db:migrate -w apps/api && npm run db:seed -w apps/api",
+    "mobile:analyze": "cd apps/mobile_app && flutter analyze",
+    "mobile:test": "cd apps/mobile_app && flutter test"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
