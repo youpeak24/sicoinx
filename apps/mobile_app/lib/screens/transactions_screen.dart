@@ -52,7 +52,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                 ],
               ),
               const Divider(height: 24),
-              _row('Tx Hash:', (tx['txHash'] ?? '0x...').toString().substring(0, 14) + '...'),
+              _row('Tx Hash:', '${(tx['txHash'] ?? '0x...').toString().substring(0, 14)}...'),
               _row('Type:', tx['type'] ?? 'RECORD'),
               _row('Coins Transacted:', '${tx['coinAmount']} SI', isBold: true),
               _row('Balance After:', '${tx['balanceAfter']} SI'),

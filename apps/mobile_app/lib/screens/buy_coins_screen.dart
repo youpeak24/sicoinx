@@ -102,7 +102,7 @@ class _BuyCoinsScreenState extends State<BuyCoinsScreen> {
         tileColor: const Color(0xFFF7FAFF),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: const Border.all(color: Color(0xFFDFE8F5)),
+          side: const BorderSide(color: Color(0xFFDFE8F5)),
         ),
         leading: Icon(icon, color: const Color(0xFF175CFF)),
         title: Text(title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
@@ -236,7 +236,7 @@ class _BuyCoinsScreenState extends State<BuyCoinsScreen> {
                         suffixStyle: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF64748B)),
                         filled: true,
                         fillColor: const Color(0xFFF7FAFF),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const Border.all(color: Color(0xFFDFE8F5))),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFFDFE8F5))),
                       ),
                     ),
                     const SizedBox(height: 12),

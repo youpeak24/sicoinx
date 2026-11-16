@@ -61,7 +61,7 @@ class _SupportScreenState extends State<SupportScreen> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: _category,
+                initialValue: _category,
                 items: const [
                   DropdownMenuItem(value: 'Wallet & Trading', child: Text('Wallet & Trading')),
                   DropdownMenuItem(value: 'Razorpay Payment', child: Text('Razorpay Payment')),
@@ -162,7 +162,7 @@ class _SupportScreenState extends State<SupportScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.between,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(t['category'] ?? 'General', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF175CFF))),
                               Container(

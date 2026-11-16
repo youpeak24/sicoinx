@@ -19,7 +19,7 @@ export const PublicLayout: React.FC = () => {
       </main>
       <Footer />
       <BottomNav />
-      <DevMailboxModal />
+      <DevMailboxModal aboveBottomNav />
     </div>
   );
 };

@@ -298,7 +298,7 @@ export const DashboardLayout: React.FC = () => {
       {/* Web Application Bottom Navigation Bar */}
       <BottomNav />
 
-      <DevMailboxModal />
+      <DevMailboxModal aboveBottomNav />
     </div>
   );
 };

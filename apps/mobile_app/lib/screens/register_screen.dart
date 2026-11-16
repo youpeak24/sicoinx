@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
-import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -92,7 +91,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         hintText: 'John Doe',
                         filled: true,
                         fillColor: const Color(0xFFF7FAFF),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const Border.all(color: Color(0xFFDFE8F5))),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFDFE8F5))),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -105,7 +104,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         hintText: 'john@example.com',
                         filled: true,
                         fillColor: const Color(0xFFF7FAFF),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const Border.all(color: Color(0xFFDFE8F5))),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFDFE8F5))),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -118,7 +117,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         hintText: 'Minimum 8 characters',
                         filled: true,
                         fillColor: const Color(0xFFF7FAFF),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const Border.all(color: Color(0xFFDFE8F5))),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFDFE8F5))),
                       ),
                     ),
                   ],

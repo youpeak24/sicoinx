@@ -65,7 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF175CFF).withOpacity(0.3),
+                          color: const Color(0xFF175CFF).withValues(alpha: 0.3),
                           blurRadius: 15,
                           offset: const Offset(0, 8),
                         ),
@@ -148,11 +148,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           fillColor: const Color(0xFFF7FAFF),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const Border.all(color: Color(0xFFDFE8F5)),
+                            borderSide: const BorderSide(color: Color(0xFFDFE8F5)),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const Border.all(color: Color(0xFFDFE8F5)),
+                            borderSide: const BorderSide(color: Color(0xFFDFE8F5)),
                           ),
                         ),
                       ),
@@ -176,11 +176,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           fillColor: const Color(0xFFF7FAFF),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const Border.all(color: Color(0xFFDFE8F5)),
+                            borderSide: const BorderSide(color: Color(0xFFDFE8F5)),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const Border.all(color: Color(0xFFDFE8F5)),
+                            borderSide: const BorderSide(color: Color(0xFFDFE8F5)),
                           ),
                         ),
                       ),

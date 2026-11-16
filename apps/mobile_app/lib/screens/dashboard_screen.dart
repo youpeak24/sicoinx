@@ -140,7 +140,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF175CFF).withOpacity(0.3),
+                  color: const Color(0xFF175CFF).withValues(alpha: 0.3),
                   blurRadius: 18,
                   offset: const Offset(0, 8),
                 ),
@@ -150,13 +150,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.between,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('SIcoinX DIGITAL WALLET', style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -321,7 +321,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           // 5. Recent Transactions Header
           Row(
-            mainAxisAlignment: MainAxisAlignment.between,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text('Recent Ledger Transactions', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF10213A))),
               TextButton(
@@ -425,7 +425,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           border: Border.all(color: const Color(0xFFDFE8F5)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.02),
+              color: Colors.black.withValues(alpha: 0.02),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
