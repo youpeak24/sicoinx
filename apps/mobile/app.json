@@ -10,13 +10,14 @@
     "backgroundColor": "#F7FAFF",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.sicoinx.mobile",
+      "bundleIdentifier": "sicoinx.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
-      "package": "com.sicoinx.mobile",
+      "package": "sicoinx.app",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/adaptive-icon.png"
@@ -44,7 +45,9 @@
           "backgroundColor": "#F7FAFF"
         }
       ],
-      "expo-font"
+      "expo-font",
+      "@react-native-firebase/app",
+      "@react-native-firebase/analytics"
     ],
     "experiments": {
       "typedRoutes": true

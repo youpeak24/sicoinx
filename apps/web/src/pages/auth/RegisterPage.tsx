@@ -43,7 +43,7 @@ export const RegisterPage: React.FC = () => {
           <div className="inline-block transition-transform duration-200 hover:scale-105">
             <SiLogo size="md" className="justify-center" />
           </div>
-          <h2 className="text-2xl font-bold text-[#10213A] pt-2">Create your account</h2>
+          <h1 className="text-2xl font-bold text-[#10213A] pt-2">Create your account</h1>
           <p className="text-xs text-[#64748B]">
             Join the SI Coin ecosystem to monitor portfolio assets, connect wallets, and access research
           </p>
@@ -65,7 +65,7 @@ export const RegisterPage: React.FC = () => {
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. David Mercer"
+                placeholder="Your full name"
                 className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-[#DFE8F5] bg-[#F7FAFF] focus:bg-white focus:border-[#175CFF] focus:ring-2 focus:ring-[#175CFF]/15 transition-all shadow-xs"
               />
             </div>

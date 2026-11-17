@@ -13,6 +13,7 @@ import { ChoiceList, type Option } from '@/components/Choices';
 import { Sheet } from '@/components/Sheet';
 import { EmptyView, ErrorView, LoadingView } from '@/components/State';
 import { TextField } from '@/components/TextField';
+import { track } from '@/lib/analytics';
 import { formatDateTime, statusLabel, ticketTone } from '@/lib/format';
 import { useResource } from '@/lib/useResource';
 import { validateTicket } from '@/lib/validation';
@@ -57,6 +58,7 @@ export default function SupportScreen() {
     setFormError(null);
     try {
       const ticket = await createSupportTicket({ subject, category, message });
+      track('support_ticket_created', { category });
       setSubject('');
       setMessage('');
       setComposing(false);

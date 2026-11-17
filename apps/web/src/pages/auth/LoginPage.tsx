@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { SiLogo } from '../../components/common/SiLogo';
-import { LogIn, AlertCircle, Shield, KeyRound, Sparkles, ArrowRight } from 'lucide-react';
+import { LogIn, AlertCircle, Shield, KeyRound, ArrowRight } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -33,13 +33,6 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  // Demo credential autofill helpers
-  const fillCredentials = (userEmail: string, userPass: string) => {
-    setEmail(userEmail);
-    setPassword(userPass);
-    setErrorMsg('');
-  };
-
   return (
     <div className="min-h-[80vh] flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Background ambient lighting */}
@@ -50,39 +43,10 @@ export const LoginPage: React.FC = () => {
           <div className="inline-block transition-transform duration-200 hover:scale-105">
             <SiLogo size="md" className="justify-center" />
           </div>
-          <h2 className="text-2xl font-bold text-[#10213A] pt-2">Sign in to your account</h2>
+          <h1 className="text-2xl font-bold text-[#10213A] pt-2">Sign in to your account</h1>
           <p className="text-xs text-[#64748B]">
             Access your portfolio dashboard, wallet links, and support tickets
           </p>
-        </div>
-
-        {/* Demo Fast Login Selector */}
-        <div className="bg-[#EDF4FF] rounded-2xl p-4 border border-[#DFE8F5] space-y-2.5 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-[#123B9A] flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-[#175CFF]" />
-              Quick Demo Accounts
-            </span>
-            <span className="text-[10px] text-[#64748B]">Click to test</span>
-          </div>
-          <div className="grid grid-cols-2 gap-2 text-[11px]">
-            <button
-              type="button"
-              onClick={() => fillCredentials('admin@sicoin.org', 'AdminSecurePass123!')}
-              className="p-2.5 rounded-xl bg-white border border-[#DFE8F5] hover:border-[#175CFF] text-left transition-all duration-200 hover:-translate-y-0.5 active:scale-95 shadow-xs"
-            >
-              <strong className="block text-[#10213A]">Super Admin</strong>
-              <span className="text-[#64748B] block truncate">admin@sicoin.org</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => fillCredentials('user@sicoin.org', 'UserSecurePass123!')}
-              className="p-2.5 rounded-xl bg-white border border-[#DFE8F5] hover:border-[#175CFF] text-left transition-all duration-200 hover:-translate-y-0.5 active:scale-95 shadow-xs"
-            >
-              <strong className="block text-[#10213A]">Standard User</strong>
-              <span className="text-[#64748B] block truncate">user@sicoin.org</span>
-            </button>
-          </div>
         </div>
 
         {/* Main Form */}

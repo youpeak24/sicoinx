@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../../lib/api';
 import { CalculatorWidget } from '../../components/common/CalculatorWidget';
-import { PriceChart } from '../../components/common/PriceChart';
+// Charting (recharts) is heavy: load it on demand so it stays out of the entry bundle.
+const PriceChart = lazy(() => import('../../components/common/PriceChart').then((m) => ({ default: m.PriceChart })));
 import { ScrollReveal } from '../../components/common/animations/ScrollReveal';
 import { AnimatedCounter } from '../../components/common/animations/AnimatedCounter';
 import { MarketMarquee } from '../../components/common/animations/MarketMarquee';
@@ -507,7 +508,9 @@ export const HomePage: React.FC = () => {
           </div>
           <div className="lg:col-span-7">
             <ScrollReveal direction="left" delay={200}>
-              <PriceChart initialRange="30D" />
+              <Suspense fallback={<div className="min-h-[360px] rounded-3xl border border-[#DFE8F5] bg-white" aria-hidden="true" />}>
+                <PriceChart initialRange="30D" />
+              </Suspense>
             </ScrollReveal>
           </div>
         </div>

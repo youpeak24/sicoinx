@@ -1,0 +1,21 @@
+# robots.txt for https://sicoinx.com
+#
+# All public pages are open to every crawler — search engines (Google, Bing,
+# DuckDuckGo, Yandex, Baidu, Apple) and answer/AI engines (GPTBot, ClaudeBot,
+# PerplexityBot, Google-Extended, ...). A single group applies to all of them so
+# no crawler falls through a gap between per-bot rules.
+#
+# - /api/ is deliberately NOT blocked: the pages fetch their content from it, and
+#   Googlebot must be able to load those calls to render FAQ, tokenomics, etc.
+#   The API responds with "X-Robots-Tag: noindex" so JSON never enters the index.
+# - /dashboard is NOT blocked either: it is linked from the public footer and a
+#   crawlable page can serve its "noindex" directive (a blocked page cannot).
+# - /admin is login-protected, unlinked from public pages, and also noindex.
+
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /shell-private
+Disallow: /shell-article
+
+Sitemap: https://sicoinx.com/sitemap.xml

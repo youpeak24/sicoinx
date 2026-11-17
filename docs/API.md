@@ -41,7 +41,7 @@ Authenticate an existing user and establish an HttpOnly session cookie.
   ```json
   {
     "email": "admin@sicoin.org",
-    "password": "AdminSecurePass123!"
+    "password": "<your-password>"
   }
   ```
 - **Response `(200 OK)`**: Sets `sicoin_session` cookie; returns user profile.

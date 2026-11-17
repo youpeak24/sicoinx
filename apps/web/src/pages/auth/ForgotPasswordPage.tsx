@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { api } from '../../lib/api';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { auth } from '../../lib/firebase';
 import { SiLogo } from '../../components/common/SiLogo';
 import { Mail, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
 
@@ -16,7 +17,12 @@ export const ForgotPasswordPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      await api.post('/auth/forgot-password', { email });
+      try {
+        await sendPasswordResetEmail(auth, email.trim(), { url: `${window.location.origin}/login` });
+      } catch (e: any) {
+        // Don't reveal whether an account exists; only surface non-account errors.
+        if (e?.code !== 'auth/user-not-found') throw e;
+      }
       setIsSubmitted(true);
     } catch (err: any) {
       setErrorMsg(err.message || 'Request failed. Please try again.');
@@ -30,7 +36,7 @@ export const ForgotPasswordPage: React.FC = () => {
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2">
           <SiLogo size="md" className="justify-center" />
-          <h2 className="text-2xl font-bold text-[#10213A] pt-2">Reset your password</h2>
+          <h1 className="text-2xl font-bold text-[#10213A] pt-2">Reset your password</h1>
           <p className="text-xs text-[#64748B]">
             Enter your account email to receive a secure single-use password recovery link
           </p>

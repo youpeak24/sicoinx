@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "36865705365",
+    "project_id": "sicoinx",
+    "storage_bucket": "sicoinx.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:36865705365:android:a5ac74fab4a225e3be229c",
+        "android_client_info": {
+          "package_name": "sicoinx.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCacyZ8NR_ZgZdHlLwqM9LlK3FYVlSpYhg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

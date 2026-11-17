@@ -70,7 +70,7 @@ export const WalletsPage: React.FC = () => {
   const [faucetMsg, setFaucetMsg] = useState('');
 
   // Transaction Ledger Filter
-  const [txFilter, setTxFilter] = useState<'ALL' | 'BUY_COIN' | 'TRANSFER_OUT' | 'TRANSFER_IN' | 'FAUCET_CLAIM'>('ALL');
+  const [txFilter, setTxFilter] = useState<'ALL' | 'BUY_COIN' | 'SELL_COIN' | 'TRANSFER_OUT' | 'TRANSFER_IN'>('ALL');
 
   const fetchWallets = () => {
     setIsLoading(true);
@@ -416,8 +416,9 @@ export const WalletsPage: React.FC = () => {
             {[
               { label: 'All', value: 'ALL' },
               { label: 'Purchases', value: 'BUY_COIN' },
-              { label: 'Transfers', value: 'TRANSFER_OUT' },
-              { label: 'Faucet', value: 'FAUCET_CLAIM' },
+              { label: 'Sales', value: 'SELL_COIN' },
+              { label: 'Sent', value: 'TRANSFER_OUT' },
+              { label: 'Received', value: 'TRANSFER_IN' },
             ].map((tab) => (
               <button
                 key={tab.value}
@@ -467,7 +468,7 @@ export const WalletsPage: React.FC = () => {
                       {tx.coinAmount} SI
                     </span>
                     <span className="text-[11px] text-[#64748B] block tabular-nums">
-                      {tx.fiatValueUsd}
+                      {tx.fiatAmount || '—'}
                     </span>
                   </div>
                 </div>
@@ -511,7 +512,7 @@ export const WalletsPage: React.FC = () => {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. SICX-A8F2-... or user@sicoin.org"
+                  placeholder="Wallet ID (SICX-…) or account email"
                   value={recipientInput}
                   onChange={(e) => setRecipientInput(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-[#DFE8F5] bg-[#F7FAFF] focus:bg-white text-[#10213A] font-mono text-xs"

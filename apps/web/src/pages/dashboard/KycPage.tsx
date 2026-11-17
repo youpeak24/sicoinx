@@ -156,7 +156,7 @@ export const KycPage: React.FC = () => {
                 required
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="e.g. David M. User"
+                placeholder="Full name as on your ID"
                 className="w-full text-xs font-medium px-4 py-2.5 rounded-xl border border-[#DFE8F5] focus:ring-2 focus:ring-[#175CFF]"
               />
             </div>

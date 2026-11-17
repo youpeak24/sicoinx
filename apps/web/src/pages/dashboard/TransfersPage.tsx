@@ -205,7 +205,7 @@ export const TransfersPage: React.FC = () => {
                 onChange={(e) => setRecipientIdentifier(e.target.value)}
                 placeholder={
                   destinationType === 'INTERNAL_USER'
-                    ? 'user@sicoin.org or SICX-XXXX-XXXX-XXXX'
+                    ? 'name@example.com or SICX-…'
                     : 'user@youpeak.live'
                 }
                 className="w-full text-xs font-mono font-medium px-4 py-2.5 rounded-xl border border-[#DFE8F5] focus:ring-2 focus:ring-[#175CFF]"

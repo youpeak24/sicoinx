@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { api } from '../../lib/api';
+import { applyActionCode } from 'firebase/auth';
+import { auth } from '../../lib/firebase';
 import { SiLogo } from '../../components/common/SiLogo';
 import { CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
 
 export const VerifyEmailPage: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const tokenFromUrl = searchParams.get('token') || '';
+  const tokenFromUrl = searchParams.get('oobCode') || searchParams.get('token') || '';
   const [token, setToken] = useState(tokenFromUrl);
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>(
     tokenFromUrl ? 'loading' : 'idle'
@@ -17,7 +18,7 @@ export const VerifyEmailPage: React.FC = () => {
     setStatus('loading');
     setMessage('');
     try {
-      await api.post('/auth/verify-email', { token: verifyToken });
+      await applyActionCode(auth, verifyToken);
       setStatus('success');
       setMessage('Your email address has been verified successfully!');
     } catch (err: any) {
@@ -37,7 +38,7 @@ export const VerifyEmailPage: React.FC = () => {
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2">
           <SiLogo size="md" className="justify-center" />
-          <h2 className="text-2xl font-bold text-[#10213A] pt-2">Email Verification</h2>
+          <h1 className="text-2xl font-bold text-[#10213A] pt-2">Email Verification</h1>
           <p className="text-xs text-[#64748B]">Confirm your cryptographic account address</p>
         </div>
 

@@ -1,81 +1,77 @@
+import 'dotenv/config';
+import crypto from 'crypto';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
+/** Cryptographically random password with upper, lower, digit and symbol. No look-alike or shell-special characters. */
+function generatePassword(length = 20): string {
+  const sets = ['ABCDEFGHJKLMNPQRSTUVWXYZ', 'abcdefghijkmnopqrstuvwxyz', '23456789', '!@%*-_'];
+  const all = sets.join('');
+  const chars = sets.map((s) => s[crypto.randomInt(s.length)]);
+  while (chars.length < length) chars.push(all[crypto.randomInt(all.length)]);
+  for (let i = chars.length - 1; i > 0; i--) {
+    const j = crypto.randomInt(i + 1);
+    [chars[i], chars[j]] = [chars[j], chars[i]];
+  }
+  return chars.join('');
+}
+
+interface StaffAccount {
+  email: string;
+  name: string;
+  role: string;
+  passwordEnv: string;
+}
+
+/**
+ * Staff accounts only. No customer/demo accounts are created: real users sign up themselves.
+ * Passwords come from the environment, or are generated randomly and printed ONCE at the end of seeding.
+ * Set RESET_STAFF_PASSWORDS=true to overwrite the passwords of staff accounts that already exist.
+ */
+const STAFF: StaffAccount[] = [
+  {
+    email: process.env.INITIAL_ADMIN_EMAIL || 'admin@sicoin.org',
+    name: process.env.INITIAL_ADMIN_NAME || 'System Administrator',
+    role: 'SUPER_ADMIN',
+    passwordEnv: 'INITIAL_ADMIN_PASSWORD',
+  },
+  { email: 'finance@sicoin.org', name: 'Finance Manager', role: 'FINANCE_MANAGER', passwordEnv: 'INITIAL_FINANCE_PASSWORD' },
+  { email: 'editor@sicoin.org', name: 'Content Editor', role: 'CONTENT_EDITOR', passwordEnv: 'INITIAL_EDITOR_PASSWORD' },
+  { email: 'support@sicoin.org', name: 'Support Agent', role: 'SUPPORT_AGENT', passwordEnv: 'INITIAL_SUPPORT_PASSWORD' },
+];
+
 async function main() {
   console.log('Seeding SI Coin database...');
 
-  // 1. Initial Admin & Staff Users
-  const adminPasswordHash = await bcrypt.hash('AdminSecurePass123!', 12);
-  const userPasswordHash = await bcrypt.hash('UserSecurePass123!', 12);
+  // 1. Staff accounts
+  const resetPasswords = process.env.RESET_STAFF_PASSWORDS === 'true';
+  const generatedCredentials: { role: string; email: string; password: string }[] = [];
+  const generatedPartnerCredentials: { partner: string; apiKey: string; apiSecret: string }[] = [];
+  let superAdmin: { id: string; email: string } | null = null;
 
-  const superAdmin = await prisma.user.upsert({
-    where: { email: 'admin@sicoin.org' },
-    update: {},
-    create: {
-      email: 'admin@sicoin.org',
-      name: 'Chief System Administrator',
-      passwordHash: adminPasswordHash,
-      role: 'SUPER_ADMIN',
-      isEmailVerified: true,
-      mfaEnabled: false,
-    },
-  });
+  for (const staff of STAFF) {
+    const email = staff.email.toLowerCase();
+    const existing = await prisma.user.findUnique({ where: { email } });
+    const configured = process.env[staff.passwordEnv];
 
-  const financeManager = await prisma.user.upsert({
-    where: { email: 'finance@sicoin.org' },
-    update: {},
-    create: {
-      email: 'finance@sicoin.org',
-      name: 'Elena Rostova',
-      passwordHash: adminPasswordHash,
-      role: 'FINANCE_MANAGER',
-      isEmailVerified: true,
-      mfaEnabled: false,
-    },
-  });
-
-  const contentEditor = await prisma.user.upsert({
-    where: { email: 'editor@sicoin.org' },
-    update: {},
-    create: {
-      email: 'editor@sicoin.org',
-      name: 'Marcus Vance',
-      passwordHash: adminPasswordHash,
-      role: 'CONTENT_EDITOR',
-      isEmailVerified: true,
-      mfaEnabled: false,
-    },
-  });
-
-  const supportAgent = await prisma.user.upsert({
-    where: { email: 'support@sicoin.org' },
-    update: {},
-    create: {
-      email: 'support@sicoin.org',
-      name: 'Sarah Chen',
-      passwordHash: adminPasswordHash,
-      role: 'SUPPORT_AGENT',
-      isEmailVerified: true,
-      mfaEnabled: false,
-    },
-  });
-
-  const demoUser = await prisma.user.upsert({
-    where: { email: 'user@sicoin.org' },
-    update: {},
-    create: {
-      email: 'user@sicoin.org',
-      name: 'David Mercer',
-      passwordHash: userPasswordHash,
-      role: 'USER',
-      isEmailVerified: true,
-      mfaEnabled: false,
-    },
-  });
-
-  console.log('Seeded users: admin@sicoin.org, finance@sicoin.org, user@sicoin.org');
+    let user = existing;
+    if (!existing || resetPasswords) {
+      const password = configured || generatePassword();
+      if (!configured) generatedCredentials.push({ role: staff.role, email, password });
+      const passwordHash = await bcrypt.hash(password, 12);
+      user = await prisma.user.upsert({
+        where: { email },
+        update: { passwordHash, name: staff.name, role: staff.role },
+        create: { email, name: staff.name, passwordHash, role: staff.role, isEmailVerified: true, mfaEnabled: false },
+      });
+    }
+    if (staff.role === 'SUPER_ADMIN') superAdmin = user;
+  }
+  if (!superAdmin) throw new Error('Super admin account was not created');
+  const admin = superAdmin as { id: string; email: string };
+  console.log('Staff accounts ready: ' + STAFF.map((s) => s.email).join(', '));
 
   // 2. Coin Configuration
   await prisma.coinConfiguration.upsert({
@@ -111,40 +107,25 @@ async function main() {
     },
   });
 
-  // 4. Historical Price Records (Spanning past 30 days)
+  // 4. Initial administrator-set reference price (history accrues from real price updates)
   const existingObservations = await prisma.priceObservation.count();
   if (existingObservations === 0) {
-    const historicalPoints = [
-      { daysAgo: 30, price: '0.850000', reason: 'Initial seed price baseline' },
-      { daysAgo: 25, price: '0.890000', reason: 'Milestone 1 alpha delivery' },
-      { daysAgo: 20, price: '0.940000', reason: 'Technical paper peer review publication' },
-      { daysAgo: 15, price: '0.990000', reason: 'Testnet node telemetry preview' },
-      { daysAgo: 10, price: '1.080000', reason: 'Ecosystem tools integration v0.4' },
-      { daysAgo: 5,  price: '1.140000', reason: 'Community developer testnet signup surge' },
-      { daysAgo: 2,  price: '1.190000', reason: 'Smart contract formal verification completion' },
-      { daysAgo: 1,  price: '1.220000', reason: 'Pre-launch stability index evaluation' },
-      { daysAgo: 0,  price: '1.250000', reason: 'Current active administrator-set reference price' },
-    ];
-
-    const now = Date.now();
-    for (const pt of historicalPoints) {
-      const timestamp = new Date(now - pt.daysAgo * 24 * 60 * 60 * 1000);
-      await prisma.priceObservation.create({
-        data: {
-          priceUsd: pt.price,
-          quoteCurrency: 'USD',
-          source: 'MANUAL',
-          sourceLabel: 'Administrator-set reference price',
-          effectiveTimestamp: timestamp,
-          recordedTimestamp: timestamp,
-          actorEmail: 'admin@sicoin.org',
-          changeReason: pt.reason,
-          isCorrection: false,
-          isDemoData: false,
-        },
-      });
-    }
-    console.log(`Seeded ${historicalPoints.length} historical price observations.`);
+    const now = new Date();
+    await prisma.priceObservation.create({
+      data: {
+        priceUsd: '1.250000',
+        quoteCurrency: 'USD',
+        source: 'MANUAL',
+        sourceLabel: 'Administrator-set reference price',
+        effectiveTimestamp: now,
+        recordedTimestamp: now,
+        actorEmail: admin.email,
+        changeReason: 'Initial reference price',
+        isCorrection: false,
+        isDemoData: false,
+      },
+    });
+    console.log('Seeded the initial reference price.');
   }
 
   // 5. Token Allocations (strictly totaling 100%)
@@ -364,81 +345,6 @@ async function main() {
     console.log('Seeded roadmap milestones.');
   }
 
-  // 8. Announcements
-  const existingAnnouncements = await prisma.announcement.count();
-  if (existingAnnouncements === 0) {
-    await prisma.announcement.create({
-      data: {
-        title: 'Explore the SI Coin ecosystem and project roadmap',
-        slug: 'welcome-to-si-coin-ecosystem',
-        summary: 'We are proud to present the official SI Coin platform, delivering transparent tokenomics, live reference pricing, and verifiable development progress.',
-        content: `
-Welcome to SI Coin.
-
-Our mission is to establish a clearer, mathematically rigorous, and fully transparent digital asset ecosystem. 
-Unlike conventional platforms that make ungrounded financial promises, SI Coin enforces absolute clarity across all operations:
-
-- Transparent Reference Pricing: Every displayed value discloses its provenance, exact calculation method, and timestamp.
-- Strict Vesting Disclosures: 100% of the token supply is accounted for with audited linear schedules.
-- Non-Custodial Architecture: We never request, process, or store user seed phrases or private keys.
-
-Explore our interactive token value calculator, review the technical paper, or connect with our engineering team through our dedicated support portal.
-        `.trim(),
-        category: 'Ecosystem Announcement',
-        publishedAt: new Date(),
-        isPinned: true,
-        isFeaturedBanner: true,
-        status: 'PUBLISHED',
-      },
-    });
-
-    await prisma.announcement.create({
-      data: {
-        title: 'Sepolia Testnet Contract Verification & Architecture Audit',
-        slug: 'sepolia-testnet-verification-audit',
-        summary: 'The initial ERC-20 contract candidate has been deployed to the Sepolia testnet environment for comprehensive static and symbolic analysis.',
-        content: `
-We have successfully completed the initial deployment phase of the SI Coin testnet contract. 
-
-Highlights of this release:
-1. Fixed maximum supply enforced at the bytecode level (100,000,000 SI).
-2. Elimination of arbitrary mint functions or unverified re-entrancy surfaces.
-3. Integration with open-source Etherscan verification tooling.
-
-Community developers are invited to review the testnet address and submit verification reports through our secure support channels.
-        `.trim(),
-        category: 'Technical Update',
-        publishedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-        isPinned: false,
-        isFeaturedBanner: false,
-        status: 'PUBLISHED',
-      },
-    });
-
-    await prisma.announcement.create({
-      data: {
-        title: 'Q2 Transparency Report: Allocation Integrity & Vesting Controls',
-        slug: 'q2-transparency-report-allocations',
-        summary: 'A detailed breakdown of all 5 allocation tranches, vesting smart contracts, and governance multi-signature signatories.',
-        content: `
-As part of our commitment to institutional-grade clarity, our Q2 Transparency Report is now available. 
-
-Key Metrics:
-- Circulating Float: 18.5% (Reserved for initial genesis float and liquidity bootstrapping)
-- Long-Term Lockup: 81.5% distributed across Core Research (3-year schedule), Ecosystem Development (4-year schedule), and Strategic Protocol Reserve.
-- Zero Founder Dump Mechanisms: All contributor allocations are subject to minimum 12-month cliff protections.
-        `.trim(),
-        category: 'Transparency',
-        publishedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-        isPinned: false,
-        isFeaturedBanner: false,
-        status: 'PUBLISHED',
-      },
-    });
-
-    console.log('Seeded announcements.');
-  }
-
   // 9. FAQ Items
   const existingFaqs = await prisma.faqItem.count();
   if (existingFaqs === 0) {
@@ -500,77 +406,18 @@ Key Metrics:
     console.log('Seeded FAQ items.');
   }
 
-  // 10. Sample Simulated Ledger & Support Ticket for demo user
-  const existingTickets = await prisma.supportTicket.count();
-  if (existingTickets === 0) {
-    const ticket = await prisma.supportTicket.create({
-      data: {
-        userId: demoUser.id,
-        userEmail: demoUser.email,
-        userName: demoUser.name,
-        subject: 'Inquiry regarding Sepolia Testnet Faucet allocation',
-        category: 'Testnet Participation',
-        priority: 'MEDIUM',
-        status: 'IN_PROGRESS',
-        messagesCount: 2,
-        messages: {
-          create: [
-            {
-              authorId: demoUser.id,
-              authorEmail: demoUser.email,
-              authorName: demoUser.name,
-              authorRole: 'USER',
-              content: 'Hello, I have linked my testnet wallet and wanted to confirm how simulated faucet allocations are recorded on my dashboard.',
-            },
-            {
-              authorId: supportAgent.id,
-              authorEmail: supportAgent.email,
-              authorName: supportAgent.name,
-              authorRole: 'SUPPORT_AGENT',
-              content: 'Hi David! Your linked wallet has been verified. Testnet faucet claims appear in your Activity log under "Simulated Ledger" to keep demonstration data strictly separate from verified on-chain entries.',
-            },
-          ],
-        },
-      },
-    });
-
-    await prisma.simulatedLedgerEntry.create({
-      data: {
-        userId: demoUser.id,
-        type: 'DEMO_TESTNET_ALLOCATION',
-        amount: '250.000000',
-        balanceAfter: '250.000000',
-        reference: 'Sepolia Faucet Developer Grant #10842',
-        status: 'CONFIRMED',
-      },
-    });
-
-    await prisma.notification.create({
-      data: {
-        userId: demoUser.id,
-        title: 'Testnet Wallet Verified',
-        message: 'Your Ethereum testnet wallet address has been verified successfully via cryptographic challenge.',
-        type: 'SUCCESS',
-        linkUrl: '/dashboard/wallets',
-      },
-    });
-
-    console.log('Seeded sample support ticket, testnet ledger entry, and notification for demo user.');
-  }
-
   // 11. SIcoinX Digital Wallets & Ecosystem Partners
   const users = await prisma.user.findMany();
   for (const u of users) {
     const existingWallet = await prisma.wallet.findUnique({ where: { userId: u.id } });
     if (!existingWallet) {
       const address = `SICX-${u.id.replace(/-/g, '').slice(0, 4).toUpperCase()}-${u.id.replace(/-/g, '').slice(4, 8).toUpperCase()}-${u.id.replace(/-/g, '').slice(8, 12).toUpperCase()}`;
-      const initialBalance = u.email === 'user@sicoin.org' ? '500.000000' : '1000.000000';
       await prisma.wallet.create({
         data: {
           userId: u.id,
           address,
-          coinBalance: initialBalance,
-          inrBalance: '25000.00',
+          coinBalance: '0.000000',
+          inrBalance: '0.00',
           isFrozen: false,
         },
       });
@@ -579,13 +426,17 @@ Key Metrics:
 
   // 12. Seed Ecosystem Partners (YouPeak & YouPeak E-Commerce)
   const existingPartners = await prisma.ecosystemPartner.count();
+  const partnerKeys = {
+    youpeak: { apiKey: 'pk_' + crypto.randomBytes(12).toString('hex'), apiSecret: 'sk_' + crypto.randomBytes(24).toString('hex') },
+    ecommerce: { apiKey: 'pk_' + crypto.randomBytes(12).toString('hex'), apiSecret: 'sk_' + crypto.randomBytes(24).toString('hex') },
+  };
   if (existingPartners === 0) {
     await prisma.ecosystemPartner.create({
       data: {
         appName: 'YouPeak',
         slug: 'youpeak',
-        apiKey: 'pk_live_youpeak_8a92f089e1a44c',
-        apiSecret: 'sk_live_youpeak_sec_77a90f12',
+        apiKey: partnerKeys.youpeak.apiKey,
+        apiSecret: partnerKeys.youpeak.apiSecret,
         webhookUrl: 'https://youpeak.live/api/webhooks/sicoin',
         status: 'ACTIVE',
         permissions: 'read_balance,debit,credit,transfer',
@@ -596,88 +447,34 @@ Key Metrics:
       data: {
         appName: 'YouPeak E-Commerce',
         slug: 'youpeak-ecommerce',
-        apiKey: 'pk_live_youpeak_ecom_4b18c7d03e912',
-        apiSecret: 'sk_live_youpeak_ecom_sec_99d123b',
+        apiKey: partnerKeys.ecommerce.apiKey,
+        apiSecret: partnerKeys.ecommerce.apiSecret,
         webhookUrl: 'https://shop.youpeak.live/api/sicoin-ipn',
         status: 'ACTIVE',
         permissions: 'read_balance,debit,credit,transfer',
       },
     });
-    console.log('Seeded Ecosystem Partners (YouPeak and YouPeak E-Commerce).');
-  }
-
-  // 13. Seed KYC for demo user
-  const existingKyc = await prisma.kycVerification.findUnique({ where: { userId: demoUser.id } });
-  if (!existingKyc) {
-    await prisma.kycVerification.create({
-      data: {
-        userId: demoUser.id,
-        fullName: 'David M. User',
-        idType: 'AADHAAR',
-        idNumber: '4829-1928-8472',
-        documentFrontUrl: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=600',
-        documentBackUrl: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=600',
-        status: 'APPROVED',
-        reviewedById: superAdmin.id,
-        reviewedByEmail: superAdmin.email,
-        reviewedAt: new Date(),
-      },
-    });
-  }
-
-  // 14. Seed sample BuyOrder & PaymentRecord for demo user
-  const existingBuy = await prisma.buyOrder.findFirst({ where: { userId: demoUser.id } });
-  if (!existingBuy) {
-    const buyOrder = await prisma.buyOrder.create({
-      data: {
-        orderNumber: 'ORD-BUY-10001',
-        userId: demoUser.id,
-        coinAmount: '200.000000',
-        pricePerCoinInr: '105.00',
-        totalInr: '21000.00',
-        paymentMethod: 'RAZORPAY_UPI',
-        gatewayOrderId: 'order_seed_demo_9841',
-        gatewayPaymentId: 'pay_seed_demo_4412',
-        status: 'COMPLETED',
-        receiptNumber: 'REC-BUY-10001',
-      },
-    });
-
-    await prisma.paymentRecord.create({
-      data: {
-        userId: demoUser.id,
-        buyOrderId: buyOrder.id,
-        gateway: 'RAZORPAY',
-        gatewayOrderId: 'order_seed_demo_9841',
-        gatewayPaymentId: 'pay_seed_demo_4412',
-        amountInr: '21000.00',
-        currency: 'INR',
-        method: 'UPI',
-        status: 'CAPTURED',
-        receiptNumber: 'REC-BUY-10001',
-      },
-    });
-
-    const userWallet = await prisma.wallet.findUnique({ where: { userId: demoUser.id } });
-    if (userWallet) {
-      await prisma.transactionRecord.create({
-        data: {
-          txHash: '0x' + 'a'.repeat(32),
-          userId: demoUser.id,
-          walletId: userWallet.id,
-          type: 'BUY_COIN',
-          coinAmount: '+200.000000',
-          fiatAmount: '21000.00 INR',
-          balanceAfter: userWallet.coinBalance,
-          description: 'Purchase of 200.000000 SIcoinX via Razorpay UPI',
-          referenceId: buyOrder.id,
-          status: 'CONFIRMED',
-        },
-      });
-    }
+    console.log('Seeded Ecosystem Partners (YouPeak and YouPeak E-Commerce) with generated API credentials.');
+    generatedPartnerCredentials.push(
+      { partner: 'YouPeak', ...partnerKeys.youpeak },
+      { partner: 'YouPeak E-Commerce', ...partnerKeys.ecommerce },
+    );
   }
 
   console.log('Database seeding completed successfully!');
+
+  if (generatedCredentials.length > 0) {
+    console.log('\n=== GENERATED STAFF CREDENTIALS (shown once: store them in a password manager) ===');
+    for (const c of generatedCredentials) {
+      console.log('  ' + c.role.padEnd(16) + ' ' + c.email.padEnd(24) + ' ' + c.password);
+    }
+  }
+  if (generatedPartnerCredentials.length > 0) {
+    console.log('\n=== GENERATED ECOSYSTEM PARTNER API CREDENTIALS (shown once) ===');
+    for (const p of generatedPartnerCredentials) {
+      console.log('  ' + p.partner + ': key=' + p.apiKey + ' secret=' + p.apiSecret);
+    }
+  }
 }
 
 main()

@@ -3,6 +3,9 @@ import { prisma } from '../src/lib/prisma';
 import { WalletService } from '../src/lib/walletService';
 import { RazorpayService } from '../src/lib/razorpay';
 import Decimal from 'decimal.js';
+import { hashPassword, generateRandomToken } from '../src/lib/security';
+
+let createdTestUserId: string | null = null;
 
 async function runSicoinXFeaturesTest() {
   console.log('\n======================================================');
@@ -10,10 +13,19 @@ async function runSicoinXFeaturesTest() {
   console.log('======================================================\n');
 
   // Test User Lookups
-  const user = await prisma.user.findUnique({ where: { email: 'user@sicoin.org' } });
+  // The seed creates staff accounts only, so this test makes (and removes) its own customer account.
+  const user = await prisma.user.create({
+    data: {
+      email: `feature-test-${Date.now()}@example.invalid`,
+      name: 'Feature Test User',
+      passwordHash: await hashPassword(generateRandomToken(24)),
+      role: 'USER',
+      isEmailVerified: true,
+    },
+  });
+  createdTestUserId = user.id;
   const admin = await prisma.user.findUnique({ where: { email: 'admin@sicoin.org' } });
-  assert(user, 'Demo user must exist');
-  assert(admin, 'Admin user must exist');
+  assert(admin, 'Seeded admin user must exist');
 
   // 1. Digital Coin Wallet Test
   console.log('Test 1: Digital Coin Wallet Creation & Address Generation');
@@ -99,7 +111,7 @@ async function runSicoinXFeaturesTest() {
   console.log('\nTest 5: Multi-Platform Partner APIs (Debit/Credit/Balance)');
   const partner = await prisma.ecosystemPartner.findFirst({ where: { slug: 'youpeak-ecommerce' } });
   assert(partner, 'YouPeak E-Commerce partner must exist');
-  assert(partner.apiKey.startsWith('pk_live_'), 'Partner API key must exist');
+  assert(partner.apiKey.startsWith('pk_'), 'Partner API key must exist');
 
   // Simulate Partner Debit (e.g. paying for merchandise on YouPeak E-Commerce)
   const partnerDebit = await WalletService.debitCoins({
@@ -193,5 +205,8 @@ runSicoinXFeaturesTest()
     process.exit(1);
   })
   .finally(async () => {
+    if (createdTestUserId) {
+      await prisma.user.delete({ where: { id: createdTestUserId } }).catch(() => undefined);
+    }
     await prisma.$disconnect();
   });

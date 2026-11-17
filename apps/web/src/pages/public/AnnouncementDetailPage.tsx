@@ -3,6 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import { api } from '../../lib/api';
 import { ScrollReveal } from '../../components/common/animations/ScrollReveal';
 import { ArrowLeft, Calendar, Tag, ShieldCheck } from 'lucide-react';
+import { useSeo } from '../../seo/dom';
+import { announcementSeo, resolveSeo } from '../../seo/core.js';
 
 export const AnnouncementDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -18,6 +20,16 @@ export const AnnouncementDetailPage: React.FC = () => {
       .catch(console.error)
       .finally(() => setIsLoading(false));
   }, [slug]);
+
+  // Per-announcement <title>, description, canonical, Open Graph and Article JSON-LD.
+  // Unknown/expired announcements are marked noindex so they never enter the index.
+  useSeo(
+    item
+      ? announcementSeo({ ...item, slug: item.slug || slug })
+      : !isLoading
+        ? { ...resolveSeo('/announcement-not-found'), title: 'Announcement Not Found | SI Coin' }
+        : null
+  );
 
   if (isLoading) {
     return (

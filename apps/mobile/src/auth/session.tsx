@@ -13,6 +13,7 @@ import {
 import { isApiError, setAuthToken, setUnauthorizedHandler } from '@/api/client';
 import { fetchCurrentUser, logout as apiLogout } from '@/api/services';
 import type { User } from '@/api/types';
+import { identify } from '@/lib/analytics';
 
 const TOKEN_KEY = 'sicoinx_session_token';
 
@@ -66,6 +67,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const endSession = useCallback(async (message?: string) => {
     signedIn.current = false;
     setAuthToken(null);
+    identify(null);
     setUser(null);
     setNotice(message ?? null);
     setStatus('signedOut');
@@ -87,6 +89,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
         const me = await fetchCurrentUser();
         if (cancelled) return;
         signedIn.current = true;
+        identify(me.id);
         setUser(me);
         setStatus('signedIn');
       } catch (error) {
@@ -117,6 +120,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
     setAuthToken(token);
     await writeToken(token);
     signedIn.current = true;
+    identify(nextUser.id);
     setNotice(null);
     setUser(nextUser);
     setStatus('signedIn');

@@ -1,15 +1,20 @@
 {
+  "id": "/",
   "name": "SI Coin",
   "short_name": "SI Coin",
-  "description": "A Clearer Way to Explore Digital Value.",
-  "start_url": "/",
+  "description": "SI Coin (SICOINX): a clearer way to explore digital value — transparent tokenomics, reference pricing and non-custodial tools.",
+  "lang": "en",
+  "dir": "ltr",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "icons": [
-    { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
+  "categories": ["finance", "business", "productivity"],
   "theme_color": "#175CFF",
   "background_color": "#F7FAFF",
-  "display": "standalone"
+  "display": "standalone",
+  "orientation": "any"
 }

@@ -179,7 +179,7 @@ export const SellCoinsPage: React.FC = () => {
                   required
                   value={bankAccountName}
                   onChange={(e) => setBankAccountName(e.target.value)}
-                  placeholder="e.g. David M. User"
+                  placeholder="Name as on your bank account"
                   className="w-full text-xs font-medium px-3.5 py-2 rounded-xl border border-[#DFE8F5] focus:ring-2 focus:ring-[#175CFF]"
                 />
               </div>

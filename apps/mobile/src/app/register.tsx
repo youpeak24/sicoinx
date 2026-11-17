@@ -11,6 +11,7 @@ import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
 import { TextField } from '@/components/TextField';
+import { track } from '@/lib/analytics';
 import { validateEmail, validateName, validateNewPassword } from '@/lib/validation';
 import { colors } from '@/theme';
 
@@ -58,6 +59,7 @@ export default function RegisterScreen() {
     try {
       const session = await register({ name, email, password });
       await signIn(session.token, session.user);
+      track('sign_up', { method: 'password' });
       router.replace('/');
     } catch (e) {
       setError(messageOf(e));

@@ -110,11 +110,19 @@ async function runTests() {
 
   // Test 7: Wallet Challenge Expiration
   console.log('Test 7: Wallet challenge creation and expiration handling');
+  const challengeUser = await prisma.user.create({
+    data: {
+      email: `challenge-test-${Date.now()}@example.invalid`,
+      name: 'Challenge Test User',
+      passwordHash: await hashPassword(generateRandomToken(24)),
+      role: 'USER',
+    },
+  });
   const challengeToken = generateRandomToken(16);
   const expiredTime = new Date(Date.now() - 5000); // 5 seconds ago
   const tokenRecord = await prisma.verificationToken.create({
     data: {
-      userId: (await prisma.user.findFirst({ where: { email: 'user@sicoin.org' } }))!.id,
+      userId: challengeUser.id,
       token: challengeToken,
       type: 'WALLET_CHALLENGE',
       expiresAt: expiredTime,
@@ -130,6 +138,7 @@ async function runTests() {
   assert.strictEqual(validToken, null, 'Expired challenge token should not be retrieved as valid');
 
   await prisma.verificationToken.delete({ where: { id: tokenRecord.id } });
+  await prisma.user.delete({ where: { id: challengeUser.id } });
   console.log('✓ Expired challenge token correctly rejected');
 
   console.log('\n=============================================');

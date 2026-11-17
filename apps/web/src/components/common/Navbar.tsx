@@ -10,7 +10,7 @@ export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const { user, isStaff } = useAuth();
-  const { coinBalance, referencePriceUsd } = useWallet();
+  const { coinBalance, referencePriceUsd, ratesLoaded } = useWallet();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -77,7 +77,7 @@ export const Navbar: React.FC = () => {
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-extrabold text-white bg-gradient-to-r from-[#123B9A] via-[#175CFF] to-[#38BDF8] shadow-elevated hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5 active:scale-95"
           >
             <ShoppingBag className="w-3.5 h-3.5" />
-            <span>Buy SI (${referencePriceUsd.toFixed(2)})</span>
+            <span>{ratesLoaded ? `Buy SI ($${referencePriceUsd.toFixed(2)})` : 'Buy SI'}</span>
           </Link>
 
           {user ? (

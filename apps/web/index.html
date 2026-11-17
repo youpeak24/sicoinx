@@ -4,6 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- Per-page SEO tags (title, description, canonical, robots, Open Graph, Twitter, JSON-LD).
+         Rendered from src/seo/core.js by the Vite plugin (this page) and by
+         scripts/seo-postbuild.mjs (every other page). Do not edit between the markers. -->
+    <!--seo:head:start--><!--seo:head:end-->
+
+    <!-- Search-engine ownership verification (set SEO_GOOGLE_VERIFICATION / SEO_BING_VERIFICATION at build time) -->
+    <!--seo:verification-->
+
     <!-- Favicons & app icons -->
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
@@ -13,26 +21,61 @@
     <meta name="theme-color" content="#175CFF" />
     <meta name="application-name" content="SI Coin" />
     <meta name="apple-mobile-web-app-title" content="SI Coin" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="author" content="SI Coin" />
+    <meta name="generator" content="SI Coin" />
 
-    <title>SI Coin — A Clearer Way to Explore Digital Value</title>
-    <meta name="description" content="Discover SI Coin through transparent tokenomics, live reference pricing, interactive calculators, and an open verifiable digital ecosystem." />
+    <!-- Discovery files -->
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
+    <link rel="alternate" type="text/plain" title="LLMs.txt" href="/llms.txt" />
 
-    <!-- Social sharing -->
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="SI Coin" />
-    <meta property="og:title" content="SI Coin — A Clearer Way to Explore Digital Value" />
-    <meta property="og:description" content="Transparent tokenomics, live reference pricing, interactive calculators, and an open verifiable digital ecosystem." />
-    <meta property="og:image" content="/logo.png" />
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="SI Coin — A Clearer Way to Explore Digital Value" />
-    <meta name="twitter:image" content="/logo.png" />
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Site-wide structured data: Organization + WebSite -->
+    <!--seo:global-jsonld-->
+
+    <!-- Fonts (non-blocking: swap in when loaded so first paint is never held up) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" />
+    </noscript>
+
+    <!-- Crawlable pre-render shell styles (injected at build from src/seo/html.js; kept out of the
+         source HTML so Vite does not treat them as an inline CSS module) -->
+    <!--seo:shell-css-->
+
+    <!-- First paint for visitors with JavaScript: a branded splash instead of the unstyled crawlable shell.
+         The shell (#seo-shell) stays in the DOM for crawlers and no-JS visitors; the splash is removed as
+         soon as React mounts (see RemoveSplash in src/main.tsx). -->
+    <script>
+      (function () {
+        document.documentElement.classList.add('js');
+        function fail() {
+          var s = document.getElementById('app-splash');
+          if (!s || s.getAttribute('data-failed')) return;
+          s.setAttribute('data-failed', '1');
+          s.querySelector('[data-msg]').textContent = 'This is taking longer than expected.';
+          s.querySelector('[data-retry]').hidden = false;
+        }
+        window.addEventListener('error', fail, true);
+        setTimeout(fail, 20000);
+      })();
+    </script>
   </head>
   <body class="bg-[#F7FAFF] text-[#10213A] antialiased selection:bg-[#175CFF]/15 selection:text-[#123B9A] min-h-screen">
-    <div id="root"></div>
+    <div id="root"><!--seo:body:start--><!--seo:body:end--></div>
+    <div id="app-splash" role="status" aria-live="polite">
+      <img src="/logo.png" width="72" height="72" alt="" />
+      <div class="spin" aria-hidden="true"></div>
+      <span data-msg>Loading SI Coin…</span>
+      <button type="button" data-retry hidden onclick="location.reload()">Reload</button>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

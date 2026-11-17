@@ -1,3 +1,5 @@
+import { auth } from './firebase';
+
 export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
@@ -58,6 +60,14 @@ export async function request<T = any>(
   const headers = new Headers(options.headers || {});
   if (!headers.has('Content-Type') && !(options.body instanceof FormData)) {
     headers.set('Content-Type', 'application/json');
+  }
+
+  // Identify the signed-in Firebase user to any API that accepts ID tokens.
+  try {
+    const token = await auth.currentUser?.getIdToken();
+    if (token && !headers.has('Authorization')) headers.set('Authorization', `Bearer ${token}`);
+  } catch {
+    // Unauthenticated request
   }
 
   const response = await fetch(url, {

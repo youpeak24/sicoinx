@@ -13,6 +13,7 @@ import { Screen } from '@/components/Screen';
 import { Sheet } from '@/components/Sheet';
 import { ErrorView, LoadingView } from '@/components/State';
 import { TextField } from '@/components/TextField';
+import { track } from '@/lib/analytics';
 import { formatCoin, formatInr, multiplyToInr, sanitizeDecimalInput } from '@/lib/money';
 import { useResource } from '@/lib/useResource';
 import { validateCoinAmount } from '@/lib/validation';
@@ -101,6 +102,12 @@ export default function BuyScreen() {
         razorpayOrderId: order.razorpayOrder.id,
         razorpayPaymentId: order.testPaymentId!,
         razorpaySignature: order.testSignatureHelper!,
+      });
+      track('purchase', {
+        currency: 'INR',
+        value: Number(order.totalInr),
+        transaction_id: order.orderNumber,
+        payment_method: method,
       });
       setOrder(null);
       setReceipt(

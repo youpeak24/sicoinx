@@ -3,6 +3,8 @@ import { api } from '../../lib/api';
 import { ScrollReveal } from '../../components/common/animations/ScrollReveal';
 import { ChevronDown, Search, HelpCircle, MessageSquare, Sparkles, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useExtraJsonLd } from '../../seo/dom';
+import { faqJsonLd, resolveSeo } from '../../seo/core.js';
 
 export const FaqPage: React.FC = () => {
   const [faqs, setFaqs] = useState<any[]>([]);
@@ -24,6 +26,9 @@ export const FaqPage: React.FC = () => {
       .catch(console.error)
       .finally(() => setIsLoading(false));
   }, []);
+
+  // FAQPage structured data built from the published questions (all of them, not just the filtered view).
+  useExtraJsonLd(resolveSeo('/faq'), faqJsonLd('/faq', faqs));
 
   const categories = ['ALL', ...Array.from(new Set(faqs.map((f) => f.category)))];
 

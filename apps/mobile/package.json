@@ -4,9 +4,12 @@
   "main": "expo-router/entry",
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
+    "@react-native-firebase/analytics": "^27.1.1",
+    "@react-native-firebase/app": "^27.1.1",
     "decimal.js": "^10.6.0",
     "expo": "~58.0.25",
     "expo-constants": "~58.0.16",
+    "expo-dev-client": "~58.0.20",
     "expo-font": "~58.0.12",
     "expo-image-picker": "~58.0.10",
     "expo-linking": "~58.0.17",
@@ -32,8 +35,8 @@
   },
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
     "test": "jest",

@@ -16,6 +16,14 @@ const queryClient = new QueryClient({
   },
 });
 
+/** Removes the static splash from index.html once React has mounted. */
+const RemoveSplash: React.FC = () => {
+  React.useEffect(() => {
+    document.getElementById('app-splash')?.remove();
+  }, []);
+  return null;
+};
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
@@ -23,6 +31,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <AuthProvider>
           <WalletProvider>
             <App />
+            <RemoveSplash />
           </WalletProvider>
         </AuthProvider>
       </BrowserRouter>

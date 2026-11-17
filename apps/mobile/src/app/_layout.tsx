@@ -1,4 +1,4 @@
-import { SplashScreen, Stack } from 'expo-router';
+import { SplashScreen, Stack, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -6,6 +6,7 @@ import { StyleSheet, View } from 'react-native';
 import { SessionProvider, useSession } from '@/auth/session';
 import { Button } from '@/components/Button';
 import { ErrorView } from '@/components/State';
+import { trackScreen } from '@/lib/analytics';
 import { colors } from '@/theme';
 
 // Keep the splash screen up until the saved session has been restored.
@@ -16,6 +17,7 @@ export default function RootLayout() {
     <SessionProvider>
       <StatusBar style="dark" />
       <SplashGate />
+      <ScreenTracker />
       <RootNavigator />
     </SessionProvider>
   );
@@ -26,6 +28,16 @@ function SplashGate() {
   useEffect(() => {
     if (status !== 'loading') SplashScreen.hide();
   }, [status]);
+  return null;
+}
+
+/** Logs a screen_view per route. Uses the route template, so ids such as ticket/[id] never reach analytics. */
+function ScreenTracker() {
+  const segments = useSegments();
+  const screen = segments.filter((s) => !/^(.*)$/.test(s)).join('/') || 'wallet';
+  useEffect(() => {
+    trackScreen(screen);
+  }, [screen]);
   return null;
 }
 

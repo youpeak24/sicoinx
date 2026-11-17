@@ -12,6 +12,7 @@ import { SegmentedChoice, type Option } from '@/components/Choices';
 import { Screen } from '@/components/Screen';
 import { ErrorView, LoadingView } from '@/components/State';
 import { TextField } from '@/components/TextField';
+import { track } from '@/lib/analytics';
 import { formatCoin, sanitizeDecimalInput } from '@/lib/money';
 import { useResource } from '@/lib/useResource';
 import { validateCoinAmount, validateNote, validateRecipient } from '@/lib/validation';
@@ -90,6 +91,7 @@ export default function TransferScreen() {
         coinAmount: amount.trim(),
         note,
       });
+      track('coin_transfer', { destination: destinationType === 'ECOSYSTEM_APP' ? destinationApp : 'INTERNAL_USER' });
       setSent({ amount: formatCoin(amount), reference: result.transfer.transferNumber });
     } catch (e) {
       setError(messageOf(e));

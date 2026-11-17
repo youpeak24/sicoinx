@@ -44,17 +44,20 @@ npm run dev -w apps/web
 
 ---
 
-## 2. Bootstrapped Accounts & Credentials
+## 2. Bootstrapped Staff Accounts
 
-The seed script (`apps/api/prisma/seed.ts`) populates the system with pre-configured accounts representing every RBAC tier:
+The seed script (`apps/api/prisma/seed.ts`) creates one staff account per administrative RBAC tier. It creates no customer
+accounts, balances, orders, tickets or announcements.
 
-| Role | Email Address | Default Password | Scope of Access |
-|---|---|---|---|
-| **Super Admin** | `admin@sicoin.org` | `AdminSecurePass123!` | Unrestricted system control, user management, audit trails |
-| **Finance Manager** | `finance@sicoin.org` | `AdminSecurePass123!` | Pricing adjustments, price schedules, tokenomics allocations |
-| **Content Editor** | `editor@sicoin.org` | `AdminSecurePass123!` | Announcements, FAQs, roadmap milestones, ecosystem modules |
-| **Support Agent** | `support@sicoin.org` | `AdminSecurePass123!` | Customer support queue triage, ticket resolution |
-| **Standard User** | `user@sicoin.org` | `UserSecurePass123!` | User portfolio, wallet linking, support submissions |
+| Role | Email | Access Level |
+|---|---|---|
+| **Super Admin** | `admin@sicoin.org` | Full control of `/admin`, users, and audits |
+| **Finance Manager** | `finance@sicoin.org` | Reference pricing and tokenomics allocations |
+| **Content Editor** | `editor@sicoin.org` | Announcements, FAQs, roadmap, ecosystem |
+| **Support Agent** | `support@sicoin.org` | Customer support queue and tickets |
+
+Passwords come from `INITIAL_*_PASSWORD` in `apps/api/.env`; if unset they are generated randomly and printed once at the end
+of seeding. Ecosystem partner API credentials are also generated at seed time and printed once.
 
 > [!CAUTION]
 > In production deployments, change all default passwords immediately and configure dedicated MFA/SSO according to organizational security policy.

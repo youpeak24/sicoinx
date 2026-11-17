@@ -11,6 +11,7 @@ import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
 import { TextField } from '@/components/TextField';
+import { track } from '@/lib/analytics';
 import { validateEmail, validateLoginPassword } from '@/lib/validation';
 import { colors } from '@/theme';
 
@@ -47,6 +48,7 @@ export default function SignInScreen() {
         return;
       }
       await signIn(result.token, result.user);
+      track('login', { method: needsMfa ? 'password_mfa' : 'password' });
       router.replace('/');
     } catch (e) {
       setError(messageOf(e));

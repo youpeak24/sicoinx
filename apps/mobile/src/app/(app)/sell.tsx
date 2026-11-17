@@ -10,6 +10,7 @@ import { Card, SectionLabel } from '@/components/Card';
 import { Screen } from '@/components/Screen';
 import { ErrorView, LoadingView } from '@/components/State';
 import { TextField } from '@/components/TextField';
+import { track } from '@/lib/analytics';
 import { formatCoin, formatInr, multiplyToInr, sanitizeDecimalInput } from '@/lib/money';
 import { useResource } from '@/lib/useResource';
 import { validateBankDetails, validateCoinAmount } from '@/lib/validation';
@@ -80,6 +81,7 @@ export default function SellScreen() {
         accountNumber: accountNumber.trim(),
         ifscCode: ifsc.trim().toUpperCase(),
       });
+      track('sell_request', { currency: 'INR', value: Number(payout) });
       setOrderNumber(result.sellOrder.orderNumber);
     } catch (e) {
       setError(messageOf(e));

@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
-import { api } from '../../lib/api';
+import { confirmPasswordReset } from 'firebase/auth';
+import { auth } from '../../lib/firebase';
 import { SiLogo } from '../../components/common/SiLogo';
 import { KeyRound, CheckCircle2, AlertCircle } from 'lucide-react';
 
 export const ResetPasswordPage: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const tokenFromUrl = searchParams.get('token') || '';
+  const tokenFromUrl = searchParams.get('oobCode') || searchParams.get('token') || '';
   const [token, setToken] = useState(tokenFromUrl);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -29,7 +30,7 @@ export const ResetPasswordPage: React.FC = () => {
     setErrorMsg('');
 
     try {
-      await api.post('/auth/reset-password', { token, password });
+      await confirmPasswordReset(auth, token, password);
       setStatus('success');
     } catch (err: any) {
       setStatus('error');
@@ -42,7 +43,7 @@ export const ResetPasswordPage: React.FC = () => {
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2">
           <SiLogo size="md" className="justify-center" />
-          <h2 className="text-2xl font-bold text-[#10213A] pt-2">Set New Password</h2>
+          <h1 className="text-2xl font-bold text-[#10213A] pt-2">Set New Password</h1>
           <p className="text-xs text-[#64748B]">Choose a strong, unique password for your account</p>
         </div>
 

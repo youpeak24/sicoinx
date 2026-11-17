@@ -43,3 +43,8 @@ Thumbs.db
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# Firebase staff bootstrap (never commit)
+scripts/firebase/staff-credentials.local.json
+scripts/firebase/serviceAccount*.json
+**/*service-account*.json

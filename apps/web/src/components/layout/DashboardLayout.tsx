@@ -33,7 +33,7 @@ import {
 
 export const DashboardLayout: React.FC = () => {
   const { user, isLoading, logout, isStaff } = useAuth();
-  const { coinBalance, referencePriceUsd } = useWallet();
+  const { coinBalance, referencePriceUsd, ratesLoaded } = useWallet();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -172,10 +172,12 @@ export const DashboardLayout: React.FC = () => {
 
           <div className="flex items-center gap-3">
             {/* Live Ticker Pill */}
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#EDF4FF] border border-[#DFE8F5] text-xs font-semibold text-[#123B9A] shadow-xs">
-              <span className="w-2 h-2 rounded-full bg-[#15803D] animate-ping" />
-              <span>1 SI = ${referencePriceUsd.toFixed(4)} USD</span>
-            </div>
+            {ratesLoaded && (
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#EDF4FF] border border-[#DFE8F5] text-xs font-semibold text-[#123B9A] shadow-xs">
+                <span className="w-2 h-2 rounded-full bg-[#15803D] animate-ping" />
+                <span>1 SI = ${referencePriceUsd.toFixed(4)} USD</span>
+              </div>
+            )}
 
             {/* Quick Buy CTA Header Button */}
             <Link

@@ -52,12 +52,12 @@ export const DashboardOverview: React.FC = () => {
             Complete Web Application Workspace
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-[#10213A]">
-            Welcome back, {user?.name || 'Explorer'}
+            Welcome back{user?.name ? `, ${user.name}` : ''}
           </h1>
           <p className="text-xs text-[#64748B]">
             Cryptographic Identity: <span className="font-mono text-[#10213A] font-semibold">{user?.email}</span>
             <span className="mx-2">•</span>
-            Wallet ID: <span className="font-mono text-[#175CFF] font-semibold">{primaryWalletAddress}</span>
+            Wallet ID: <span className="font-mono text-[#175CFF] font-semibold">{primaryWalletAddress || '—'}</span>
           </p>
         </div>
 
@@ -114,22 +114,22 @@ export const DashboardOverview: React.FC = () => {
             <span className="text-xs text-[#64748B]">USD</span>
           </div>
           <span className="text-[11px] text-[#15803D] font-semibold block truncate">
-            ≈ ₹{referencePriceInr.toFixed(2)} INR (+3.42% 24h)
+            ≈ ₹{referencePriceInr.toFixed(2)} INR
           </span>
         </div>
 
         {/* 24h Telemetry Volume Card */}
         <div className="bg-white p-6 rounded-3xl border border-[#DFE8F5] shadow-card space-y-2 interactive-card">
           <div className="flex items-center justify-between text-xs text-[#64748B]">
-            <span>24h Trading Volume</span>
+            <span>Ledger Entries</span>
             <Activity className="w-4 h-4 text-[#175CFF]" />
           </div>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-2xl font-bold text-[#10213A] tabular-nums">$428,950</span>
-            <span className="text-xs font-semibold text-[#64748B]">USD</span>
+            <span className="text-2xl font-bold text-[#10213A] tabular-nums">{transactions.length}</span>
+            <span className="text-xs font-semibold text-[#64748B]">recorded</span>
           </div>
-          <span className="text-[11px] text-[#15803D] font-semibold block">
-            343,160 SI Transacted
+          <span className="text-[11px] text-[#64748B] font-semibold block">
+            Purchases, sales and transfers on your wallet
           </span>
         </div>
 
@@ -142,13 +142,24 @@ export const DashboardOverview: React.FC = () => {
             </Link>
           </div>
           <div className="text-lg font-bold text-[#10213A] flex items-center gap-1.5">
-            <span className="text-[#15803D] flex items-center gap-1 text-base">
-              <ShieldCheck className="w-5 h-5" /> Tier {kyc.tier} Verified
+            <span
+              className={`flex items-center gap-1 text-base ${
+                kyc.status === 'VERIFIED' ? 'text-[#15803D]' : kyc.status === 'REJECTED' ? 'text-[#DC2626]' : 'text-[#B45309]'
+              }`}
+            >
+              <ShieldCheck className="w-5 h-5" />{' '}
+              {kyc.status === 'VERIFIED'
+                ? 'Verified'
+                : kyc.status === 'PENDING'
+                ? 'Under review'
+                : kyc.status === 'REJECTED'
+                ? 'Rejected'
+                : 'Not verified'}
             </span>
           </div>
-          <span className="text-[11px] text-[#64748B] block">
-            Daily limit: $100,000 USD
-          </span>
+          <Link to="/dashboard/kyc" className="text-[11px] text-[#175CFF] hover:underline font-semibold block">
+            {kyc.status === 'VERIFIED' ? 'View verification details' : 'Complete identity verification'}
+          </Link>
         </div>
       </div>
 
@@ -168,6 +179,11 @@ export const DashboardOverview: React.FC = () => {
           </div>
 
           <div className="space-y-3">
+            {transactions.length === 0 && (
+              <div className="p-6 rounded-2xl bg-[#F7FAFF] border border-dashed border-[#DFE8F5] text-center text-xs text-[#64748B]">
+                No activity yet. Your purchases, sales and transfers will appear here.
+              </div>
+            )}
             {transactions.slice(0, 5).map((tx) => {
               const isPositive = tx.coinAmount.startsWith('+');
               return (
@@ -178,7 +194,7 @@ export const DashboardOverview: React.FC = () => {
                   <div className="space-y-0.5 min-w-0">
                     <span className="font-bold text-[#10213A] block truncate">{tx.title}</span>
                     <span className="text-[#64748B] text-[11px] block">
-                      {new Date(tx.timestamp).toLocaleString()} • {tx.counterparty}
+                      {new Date(tx.timestamp).toLocaleString()} • {tx.type.replace(/_/g, ' ')}
                     </span>
                   </div>
                   <div className="text-right flex-shrink-0">

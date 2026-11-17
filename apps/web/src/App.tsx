@@ -1,151 +1,178 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import React, { Suspense, lazy } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { PublicLayout } from './components/layout/PublicLayout';
-import { DashboardLayout } from './components/layout/DashboardLayout';
-import { AdminLayout } from './components/layout/AdminLayout';
+import { HomePage } from './pages/public/HomePage';
+import { NotFoundPage } from './pages/public/NotFoundPage';
+import { RouteSeo } from './seo/dom';
+
+/**
+ * Route-level code splitting: only the layout + home page ship in the entry
+ * bundle. Everything else (dashboard, admin, charts, 3D market view, Firebase
+ * heavy pages) is fetched on demand, which keeps the first load fast — a core
+ * web vital and therefore a search ranking signal.
+ */
+function lazyPage<T extends Record<string, any>>(loader: () => Promise<T>, name: keyof T) {
+  return lazy(() => loader().then((m) => ({ default: m[name] as React.ComponentType<any> })));
+}
+
+// Layouts
+const DashboardLayout = lazyPage(() => import('./components/layout/DashboardLayout'), 'DashboardLayout');
+const AdminLayout = lazyPage(() => import('./components/layout/AdminLayout'), 'AdminLayout');
 
 // Public Pages
-import { HomePage } from './pages/public/HomePage';
-import { AboutPage } from './pages/public/AboutPage';
-import { EcosystemPage } from './pages/public/EcosystemPage';
-import { TokenomicsPage } from './pages/public/TokenomicsPage';
-import { RoadmapPage } from './pages/public/RoadmapPage';
-import { MarketPage } from './pages/public/MarketPage';
-import { WhitepaperPage } from './pages/public/WhitepaperPage';
-import { AnnouncementsPage } from './pages/public/AnnouncementsPage';
-import { AnnouncementDetailPage } from './pages/public/AnnouncementDetailPage';
-import { FaqPage } from './pages/public/FaqPage';
-import { ContactPage } from './pages/public/ContactPage';
-import { TermsPage } from './pages/public/TermsPage';
-import { PrivacyPage } from './pages/public/PrivacyPage';
-import { RiskDisclosurePage } from './pages/public/RiskDisclosurePage';
-import { NotFoundPage } from './pages/public/NotFoundPage';
+const AboutPage = lazyPage(() => import('./pages/public/AboutPage'), 'AboutPage');
+const EcosystemPage = lazyPage(() => import('./pages/public/EcosystemPage'), 'EcosystemPage');
+const TokenomicsPage = lazyPage(() => import('./pages/public/TokenomicsPage'), 'TokenomicsPage');
+const RoadmapPage = lazyPage(() => import('./pages/public/RoadmapPage'), 'RoadmapPage');
+const MarketPage = lazyPage(() => import('./pages/public/MarketPage'), 'MarketPage');
+const WhitepaperPage = lazyPage(() => import('./pages/public/WhitepaperPage'), 'WhitepaperPage');
+const AnnouncementsPage = lazyPage(() => import('./pages/public/AnnouncementsPage'), 'AnnouncementsPage');
+const AnnouncementDetailPage = lazyPage(() => import('./pages/public/AnnouncementDetailPage'), 'AnnouncementDetailPage');
+const FaqPage = lazyPage(() => import('./pages/public/FaqPage'), 'FaqPage');
+const ContactPage = lazyPage(() => import('./pages/public/ContactPage'), 'ContactPage');
+const TermsPage = lazyPage(() => import('./pages/public/TermsPage'), 'TermsPage');
+const PrivacyPage = lazyPage(() => import('./pages/public/PrivacyPage'), 'PrivacyPage');
+const RiskDisclosurePage = lazyPage(() => import('./pages/public/RiskDisclosurePage'), 'RiskDisclosurePage');
 
 // Auth Pages
-import { LoginPage } from './pages/auth/LoginPage';
-import { RegisterPage } from './pages/auth/RegisterPage';
-import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
-import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
-import { VerifyEmailPage } from './pages/auth/VerifyEmailPage';
+const LoginPage = lazyPage(() => import('./pages/auth/LoginPage'), 'LoginPage');
+const RegisterPage = lazyPage(() => import('./pages/auth/RegisterPage'), 'RegisterPage');
+const ForgotPasswordPage = lazyPage(() => import('./pages/auth/ForgotPasswordPage'), 'ForgotPasswordPage');
+const ResetPasswordPage = lazyPage(() => import('./pages/auth/ResetPasswordPage'), 'ResetPasswordPage');
+const VerifyEmailPage = lazyPage(() => import('./pages/auth/VerifyEmailPage'), 'VerifyEmailPage');
 
 // Dashboard Pages
-import { DashboardOverview } from './pages/dashboard/DashboardOverview';
-import { PurchasingPage } from './pages/dashboard/PurchasingPage';
-import { CoinStatusPage } from './pages/dashboard/CoinStatusPage';
-import { ProfilePage } from './pages/dashboard/ProfilePage';
-import { PortfolioPage } from './pages/dashboard/PortfolioPage';
-import { ActivityPage } from './pages/dashboard/ActivityPage';
-import { WalletsPage } from './pages/dashboard/WalletsPage';
-import { NotificationsPage } from './pages/dashboard/NotificationsPage';
-import { SupportPage } from './pages/dashboard/SupportPage';
-import { SupportDetailPage } from './pages/dashboard/SupportDetailPage';
-import { SettingsPage } from './pages/dashboard/SettingsPage';
-import { SecurityPage } from './pages/dashboard/SecurityPage';
-import { BuyCoinsPage } from './pages/dashboard/BuyCoinsPage';
-import { SellCoinsPage } from './pages/dashboard/SellCoinsPage';
-import { TransfersPage } from './pages/dashboard/TransfersPage';
-import { TransactionsPage } from './pages/dashboard/TransactionsPage';
-import { PaymentsPage } from './pages/dashboard/PaymentsPage';
-import { KycPage } from './pages/dashboard/KycPage';
+const DashboardOverview = lazyPage(() => import('./pages/dashboard/DashboardOverview'), 'DashboardOverview');
+const ProfilePage = lazyPage(() => import('./pages/dashboard/ProfilePage'), 'ProfilePage');
+const PortfolioPage = lazyPage(() => import('./pages/dashboard/PortfolioPage'), 'PortfolioPage');
+const ActivityPage = lazyPage(() => import('./pages/dashboard/ActivityPage'), 'ActivityPage');
+const WalletsPage = lazyPage(() => import('./pages/dashboard/WalletsPage'), 'WalletsPage');
+const NotificationsPage = lazyPage(() => import('./pages/dashboard/NotificationsPage'), 'NotificationsPage');
+const SupportPage = lazyPage(() => import('./pages/dashboard/SupportPage'), 'SupportPage');
+const SupportDetailPage = lazyPage(() => import('./pages/dashboard/SupportDetailPage'), 'SupportDetailPage');
+const SettingsPage = lazyPage(() => import('./pages/dashboard/SettingsPage'), 'SettingsPage');
+const SecurityPage = lazyPage(() => import('./pages/dashboard/SecurityPage'), 'SecurityPage');
+const BuyCoinsPage = lazyPage(() => import('./pages/dashboard/BuyCoinsPage'), 'BuyCoinsPage');
+const SellCoinsPage = lazyPage(() => import('./pages/dashboard/SellCoinsPage'), 'SellCoinsPage');
+const TransfersPage = lazyPage(() => import('./pages/dashboard/TransfersPage'), 'TransfersPage');
+const TransactionsPage = lazyPage(() => import('./pages/dashboard/TransactionsPage'), 'TransactionsPage');
+const PaymentsPage = lazyPage(() => import('./pages/dashboard/PaymentsPage'), 'PaymentsPage');
+const KycPage = lazyPage(() => import('./pages/dashboard/KycPage'), 'KycPage');
 
 // Admin Pages
-import { AdminOverview } from './pages/admin/AdminOverview';
-import { AdminCoinConfig } from './pages/admin/AdminCoinConfig';
-import { AdminPricing } from './pages/admin/AdminPricing';
-import { AdminPriceHistory } from './pages/admin/AdminPriceHistory';
-import { AdminTokenomics } from './pages/admin/AdminTokenomics';
-import { AdminAnnouncements } from './pages/admin/AdminAnnouncements';
-import { AdminFaq } from './pages/admin/AdminFaq';
-import { AdminRoadmap } from './pages/admin/AdminRoadmap';
-import { AdminEcosystem } from './pages/admin/AdminEcosystem';
-import { AdminUsers } from './pages/admin/AdminUsers';
-import { AdminSupport } from './pages/admin/AdminSupport';
-import { AdminSubscribers } from './pages/admin/AdminSubscribers';
-import { AdminRoles } from './pages/admin/AdminRoles';
-import { AdminAuditLogs } from './pages/admin/AdminAuditLogs';
-import { AdminSettings } from './pages/admin/AdminSettings';
-import { AdminKycPage } from './pages/admin/AdminKycPage';
-import { AdminOrdersPage } from './pages/admin/AdminOrdersPage';
-import { AdminWalletsPage } from './pages/admin/AdminWalletsPage';
-import { AdminPaymentsPage } from './pages/admin/AdminPaymentsPage';
-import { AdminAnalyticsPage } from './pages/admin/AdminAnalyticsPage';
-import { AdminPartnersPage } from './pages/admin/AdminPartnersPage';
+const AdminOverview = lazyPage(() => import('./pages/admin/AdminOverview'), 'AdminOverview');
+const AdminCoinConfig = lazyPage(() => import('./pages/admin/AdminCoinConfig'), 'AdminCoinConfig');
+const AdminPricing = lazyPage(() => import('./pages/admin/AdminPricing'), 'AdminPricing');
+const AdminPriceHistory = lazyPage(() => import('./pages/admin/AdminPriceHistory'), 'AdminPriceHistory');
+const AdminTokenomics = lazyPage(() => import('./pages/admin/AdminTokenomics'), 'AdminTokenomics');
+const AdminAnnouncements = lazyPage(() => import('./pages/admin/AdminAnnouncements'), 'AdminAnnouncements');
+const AdminFaq = lazyPage(() => import('./pages/admin/AdminFaq'), 'AdminFaq');
+const AdminRoadmap = lazyPage(() => import('./pages/admin/AdminRoadmap'), 'AdminRoadmap');
+const AdminEcosystem = lazyPage(() => import('./pages/admin/AdminEcosystem'), 'AdminEcosystem');
+const AdminUsers = lazyPage(() => import('./pages/admin/AdminUsers'), 'AdminUsers');
+const AdminSupport = lazyPage(() => import('./pages/admin/AdminSupport'), 'AdminSupport');
+const AdminSubscribers = lazyPage(() => import('./pages/admin/AdminSubscribers'), 'AdminSubscribers');
+const AdminRoles = lazyPage(() => import('./pages/admin/AdminRoles'), 'AdminRoles');
+const AdminAuditLogs = lazyPage(() => import('./pages/admin/AdminAuditLogs'), 'AdminAuditLogs');
+const AdminSettings = lazyPage(() => import('./pages/admin/AdminSettings'), 'AdminSettings');
+const AdminKycPage = lazyPage(() => import('./pages/admin/AdminKycPage'), 'AdminKycPage');
+const AdminOrdersPage = lazyPage(() => import('./pages/admin/AdminOrdersPage'), 'AdminOrdersPage');
+const AdminWalletsPage = lazyPage(() => import('./pages/admin/AdminWalletsPage'), 'AdminWalletsPage');
+const AdminPaymentsPage = lazyPage(() => import('./pages/admin/AdminPaymentsPage'), 'AdminPaymentsPage');
+const AdminAnalyticsPage = lazyPage(() => import('./pages/admin/AdminAnalyticsPage'), 'AdminAnalyticsPage');
+const AdminPartnersPage = lazyPage(() => import('./pages/admin/AdminPartnersPage'), 'AdminPartnersPage');
+
+const PageFallback: React.FC = () => (
+  <div className="min-h-[50vh] flex items-center justify-center py-24 text-[#64748B]" role="status" aria-live="polite">
+    <div className="w-8 h-8 border-4 border-[#175CFF] border-t-transparent rounded-full animate-spin mr-3" />
+    <span>Loading…</span>
+  </div>
+);
+
+/** Wraps a lazy element so only the page area (not the surrounding layout) shows the loader. */
+const S: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <Suspense fallback={<PageFallback />}>{children}</Suspense>
+);
 
 export const App: React.FC = () => {
   return (
-    <Routes>
-      {/* Public Pages */}
-      <Route element={<PublicLayout />}>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/ecosystem" element={<EcosystemPage />} />
-        <Route path="/tokenomics" element={<TokenomicsPage />} />
-        <Route path="/roadmap" element={<RoadmapPage />} />
-        <Route path="/market" element={<MarketPage />} />
-        <Route path="/buy" element={<PurchasingPage />} />
-        <Route path="/purchase" element={<PurchasingPage />} />
-        <Route path="/whitepaper" element={<WhitepaperPage />} />
-        <Route path="/announcements" element={<AnnouncementsPage />} />
-        <Route path="/announcements/:slug" element={<AnnouncementDetailPage />} />
-        <Route path="/faq" element={<FaqPage />} />
-        <Route path="/contact" element={<ContactPage />} />
-        <Route path="/terms" element={<TermsPage />} />
-        <Route path="/privacy" element={<PrivacyPage />} />
-        <Route path="/risk-disclosure" element={<RiskDisclosurePage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
-        <Route path="/verify-email" element={<VerifyEmailPage />} />
-        <Route path="*" element={<NotFoundPage />} />
-      </Route>
+    <>
+      {/* Keeps <title>, description, canonical, robots, Open Graph and JSON-LD in sync with the route. */}
+      <RouteSeo />
+      <Routes>
+        {/* Public Pages */}
+        <Route element={<PublicLayout />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<S><AboutPage /></S>} />
+          <Route path="/ecosystem" element={<S><EcosystemPage /></S>} />
+          <Route path="/tokenomics" element={<S><TokenomicsPage /></S>} />
+          <Route path="/roadmap" element={<S><RoadmapPage /></S>} />
+          <Route path="/market" element={<S><MarketPage /></S>} />
+          <Route path="/buy" element={<Navigate to="/dashboard/buy" replace />} />
+          <Route path="/purchase" element={<Navigate to="/dashboard/buy" replace />} />
+          <Route path="/whitepaper" element={<S><WhitepaperPage /></S>} />
+          <Route path="/announcements" element={<S><AnnouncementsPage /></S>} />
+          <Route path="/announcements/:slug" element={<S><AnnouncementDetailPage /></S>} />
+          <Route path="/faq" element={<S><FaqPage /></S>} />
+          <Route path="/contact" element={<S><ContactPage /></S>} />
+          <Route path="/terms" element={<S><TermsPage /></S>} />
+          <Route path="/privacy" element={<S><PrivacyPage /></S>} />
+          <Route path="/risk-disclosure" element={<S><RiskDisclosurePage /></S>} />
+          <Route path="/login" element={<S><LoginPage /></S>} />
+          <Route path="/register" element={<S><RegisterPage /></S>} />
+          <Route path="/forgot-password" element={<S><ForgotPasswordPage /></S>} />
+          <Route path="/reset-password" element={<S><ResetPasswordPage /></S>} />
+          <Route path="/verify-email" element={<S><VerifyEmailPage /></S>} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
 
-      {/* User Dashboard */}
-      <Route path="/dashboard" element={<DashboardLayout />}>
-        <Route index element={<DashboardOverview />} />
-        <Route path="buy" element={<BuyCoinsPage />} />
-        <Route path="purchase" element={<BuyCoinsPage />} />
-        <Route path="sell" element={<SellCoinsPage />} />
-        <Route path="transfers" element={<TransfersPage />} />
-        <Route path="transactions" element={<TransactionsPage />} />
-        <Route path="payments" element={<PaymentsPage />} />
-        <Route path="kyc" element={<KycPage />} />
-        <Route path="market" element={<CoinStatusPage />} />
-        <Route path="profile" element={<ProfilePage />} />
-        <Route path="wallets" element={<WalletsPage />} />
-        <Route path="portfolio" element={<PortfolioPage />} />
-        <Route path="activity" element={<ActivityPage />} />
-        <Route path="notifications" element={<NotificationsPage />} />
-        <Route path="support" element={<SupportPage />} />
-        <Route path="support/:id" element={<SupportDetailPage />} />
-        <Route path="settings" element={<SettingsPage />} />
-        <Route path="security" element={<SecurityPage />} />
-      </Route>
+        {/* User Dashboard */}
+        <Route path="/dashboard" element={<S><DashboardLayout /></S>}>
+          <Route index element={<S><DashboardOverview /></S>} />
+          <Route path="buy" element={<S><BuyCoinsPage /></S>} />
+          <Route path="purchase" element={<S><BuyCoinsPage /></S>} />
+          <Route path="sell" element={<S><SellCoinsPage /></S>} />
+          <Route path="transfers" element={<S><TransfersPage /></S>} />
+          <Route path="transactions" element={<S><TransactionsPage /></S>} />
+          <Route path="payments" element={<S><PaymentsPage /></S>} />
+          <Route path="kyc" element={<S><KycPage /></S>} />
+          <Route path="market" element={<S><MarketPage /></S>} />
+          <Route path="profile" element={<S><ProfilePage /></S>} />
+          <Route path="wallets" element={<S><WalletsPage /></S>} />
+          <Route path="portfolio" element={<S><PortfolioPage /></S>} />
+          <Route path="activity" element={<S><ActivityPage /></S>} />
+          <Route path="notifications" element={<S><NotificationsPage /></S>} />
+          <Route path="support" element={<S><SupportPage /></S>} />
+          <Route path="support/:id" element={<S><SupportDetailPage /></S>} />
+          <Route path="settings" element={<S><SettingsPage /></S>} />
+          <Route path="security" element={<S><SecurityPage /></S>} />
+        </Route>
 
-      {/* Administration Panel */}
-      <Route path="/admin" element={<AdminLayout />}>
-        <Route index element={<AdminOverview />} />
-        <Route path="kyc" element={<AdminKycPage />} />
-        <Route path="orders" element={<AdminOrdersPage />} />
-        <Route path="wallets" element={<AdminWalletsPage />} />
-        <Route path="payments" element={<AdminPaymentsPage />} />
-        <Route path="analytics" element={<AdminAnalyticsPage />} />
-        <Route path="partners" element={<AdminPartnersPage />} />
-        <Route path="coin" element={<AdminCoinConfig />} />
-        <Route path="pricing" element={<AdminPricing />} />
-        <Route path="price-history" element={<AdminPriceHistory />} />
-        <Route path="tokenomics" element={<AdminTokenomics />} />
-        <Route path="announcements" element={<AdminAnnouncements />} />
-        <Route path="faq" element={<AdminFaq />} />
-        <Route path="roadmap" element={<AdminRoadmap />} />
-        <Route path="ecosystem" element={<AdminEcosystem />} />
-        <Route path="users" element={<AdminUsers />} />
-        <Route path="support" element={<AdminSupport />} />
-        <Route path="subscribers" element={<AdminSubscribers />} />
-        <Route path="roles" element={<AdminRoles />} />
-        <Route path="audit-logs" element={<AdminAuditLogs />} />
-        <Route path="settings" element={<AdminSettings />} />
-      </Route>
-    </Routes>
+        {/* Administration Panel */}
+        <Route path="/admin" element={<S><AdminLayout /></S>}>
+          <Route index element={<S><AdminOverview /></S>} />
+          <Route path="kyc" element={<S><AdminKycPage /></S>} />
+          <Route path="orders" element={<S><AdminOrdersPage /></S>} />
+          <Route path="wallets" element={<S><AdminWalletsPage /></S>} />
+          <Route path="payments" element={<S><AdminPaymentsPage /></S>} />
+          <Route path="analytics" element={<S><AdminAnalyticsPage /></S>} />
+          <Route path="partners" element={<S><AdminPartnersPage /></S>} />
+          <Route path="coin" element={<S><AdminCoinConfig /></S>} />
+          <Route path="pricing" element={<S><AdminPricing /></S>} />
+          <Route path="price-history" element={<S><AdminPriceHistory /></S>} />
+          <Route path="tokenomics" element={<S><AdminTokenomics /></S>} />
+          <Route path="announcements" element={<S><AdminAnnouncements /></S>} />
+          <Route path="faq" element={<S><AdminFaq /></S>} />
+          <Route path="roadmap" element={<S><AdminRoadmap /></S>} />
+          <Route path="ecosystem" element={<S><AdminEcosystem /></S>} />
+          <Route path="users" element={<S><AdminUsers /></S>} />
+          <Route path="support" element={<S><AdminSupport /></S>} />
+          <Route path="subscribers" element={<S><AdminSubscribers /></S>} />
+          <Route path="roles" element={<S><AdminRoles /></S>} />
+          <Route path="audit-logs" element={<S><AdminAuditLogs /></S>} />
+          <Route path="settings" element={<S><AdminSettings /></S>} />
+        </Route>
+      </Routes>
+    </>
   );
 };

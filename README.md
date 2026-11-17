@@ -67,17 +67,23 @@ Interactive Swagger API documentation is available at **[http://localhost:5000/a
 
 ---
 
-## 🔐 Pre-Configured Staff & Demo Accounts
+## 🔐 Staff Accounts
 
-The local database comes seeded with role-specific accounts for testing:
+The seed creates **staff accounts only** (no demo customers, balances or sample records). Customers sign up themselves.
 
-| Role | Email | Password | Access Level |
-|---|---|---|---|
-| **Super Admin** | `admin@sicoin.org` | `AdminSecurePass123!` | Full control of `/admin`, users, and audits |
-| **Finance Manager** | `finance@sicoin.org` | `AdminSecurePass123!` | Reference pricing and tokenomics allocations |
-| **Content Editor** | `editor@sicoin.org` | `AdminSecurePass123!` | Announcements, FAQs, roadmap, ecosystem |
-| **Support Agent** | `support@sicoin.org` | `AdminSecurePass123!` | Customer support queue and tickets |
-| **Standard User** | `user@sicoin.org` | `UserSecurePass123!` | User portfolio, wallet linking, support tickets |
+| Role | Email | Access Level |
+|---|---|---|
+| **Super Admin** | `admin@sicoin.org` | Full control of `/admin`, users, and audits |
+| **Finance Manager** | `finance@sicoin.org` | Reference pricing and tokenomics allocations |
+| **Content Editor** | `editor@sicoin.org` | Announcements, FAQs, roadmap, ecosystem |
+| **Support Agent** | `support@sicoin.org` | Customer support queue and tickets |
+
+Passwords are never committed. Set `INITIAL_ADMIN_PASSWORD`, `INITIAL_FINANCE_PASSWORD`, `INITIAL_EDITOR_PASSWORD` and
+`INITIAL_SUPPORT_PASSWORD` in `apps/api/.env` before seeding, or leave them unset and the seed generates random
+passwords and prints them **once**. `RESET_STAFF_PASSWORDS=true npm run db:seed -w apps/api` re-applies them.
+
+For Firebase sign-in, create the matching accounts and role documents with `scripts/firebase/create-staff.mjs`
+(see the comment at the top of that file).
 
 > **Development Mailbox**: During local testing, verification emails and password reset links are intercepted and displayed in the in-app **Dev Mailbox** modal (floating button on bottom-right) or at `GET /api/v1/auth/dev-mailboxes`.
 

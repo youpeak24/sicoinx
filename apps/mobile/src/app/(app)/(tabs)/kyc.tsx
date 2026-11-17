@@ -13,6 +13,7 @@ import { ChoiceList, type Option } from '@/components/Choices';
 import { Screen } from '@/components/Screen';
 import { ErrorView, LoadingView } from '@/components/State';
 import { TextField } from '@/components/TextField';
+import { track } from '@/lib/analytics';
 import { formatDateTime, maskId, statusLabel } from '@/lib/format';
 import { useResource } from '@/lib/useResource';
 import { validateKyc } from '@/lib/validation';
@@ -97,6 +98,7 @@ export default function KycScreen() {
         idNumber: idNumber.trim(),
         documentFrontUrl: document!.dataUri,
       });
+      track('kyc_submitted', { id_type: idType });
       setJustSubmitted({ ...saved, status: saved.status ?? 'PENDING' });
       setDocument(null);
     } catch (e) {
