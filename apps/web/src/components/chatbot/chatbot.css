@@ -479,8 +479,12 @@
   text-align: center;
 }
 
-/* ----- small screens: full-screen sheet ----- */
-@media (max-width: 520px) {
+/* ----- small screens: full-screen sheet -----
+   Chatbot.* sets --cbx-vvh / --cbx-vvt from window.visualViewport while the sheet is open, so the sheet
+   always matches the part of the screen that is actually visible. That keeps the message box above the
+   on-screen keyboard (which does not shrink 100dvh on most phones). Falls back to 100dvh without it.
+   Keep the media query in sync with SHEET_QUERY in Chatbot.*. */
+@media (max-width: 520px), (max-height: 500px) {
   .cbx.is-open {
     inset: 0;
     right: 0;
@@ -495,9 +499,13 @@
   }
   .cbx-panel {
     position: fixed;
-    inset: 0;
+    top: var(--cbx-vvt, 0px);
+    right: 0;
+    bottom: auto;
+    left: 0;
     width: 100%;
-    height: 100dvh;
+    height: var(--cbx-vvh, 100dvh);
+    min-height: 0;
     border: 0;
     border-radius: 0;
     transform-origin: bottom center;
@@ -507,6 +515,14 @@
   }
   .cbx-foot {
     padding-bottom: calc(0.65rem + env(safe-area-inset-bottom, 0px));
+  }
+  /* keyboard is up: the home-indicator inset is covered by the keyboard, so drop that padding, and hide
+     the small disclaimer to leave room for the conversation */
+  .cbx.is-kb .cbx-foot {
+    padding-bottom: 0.55rem;
+  }
+  .cbx.is-kb .cbx-note {
+    display: none;
   }
 }
 

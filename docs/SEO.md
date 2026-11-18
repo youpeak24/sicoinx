@@ -1,4 +1,4 @@
-# SEO — sicoinx.com
+# SEO — www.sicoinx.com
 
 How search visibility is implemented, how to change it, and what to do after each deploy.
 
@@ -44,10 +44,10 @@ schema.org `sameAs`, which helps Google connect the brand entity.
 
 ## After the first deploy (one-time, ~15 min)
 
-1. **Google Search Console** → add `https://sicoinx.com` as a *Domain* property (DNS TXT) → Sitemaps → submit `sitemap.xml`.
+1. **Google Search Console** → add `sicoinx.com` as a *Domain* property (it covers `www` too) (DNS TXT) → Sitemaps → submit `sitemap.xml`.
 2. **Bing Webmaster Tools** → import from Search Console (also feeds DuckDuckGo/Yahoo/Ecosia and ChatGPT search).
 3. Search Console → URL Inspection → *Request indexing* for `/`, `/tokenomics`, `/market`, `/about`, `/whitepaper`.
-4. In Vercel → Domains, make `sicoinx.com` the primary domain; `www.sicoinx.com` is redirected to it by `vercel.json`.
+4. In Vercel → Domains, make `www.sicoinx.com` the production domain and set `sicoinx.com` to redirect to it (308). `vercel.json` redirects `sicoinx.com` → `www.sicoinx.com` in the same direction. **Never configure the reverse** (www → apex) anywhere, or the site loops with ERR_TOO_MANY_REDIRECTS.
 5. Validate: [Rich Results Test](https://search.google.com/test/rich-results), [Schema validator](https://validator.schema.org),
    [PageSpeed Insights](https://pagespeed.web.dev), and share a link in Slack/X/LinkedIn to confirm the preview image.
 

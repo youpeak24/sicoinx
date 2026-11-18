@@ -12,10 +12,10 @@
       "has": [
         {
           "type": "host",
-          "value": "www.sicoinx.com"
+          "value": "sicoinx.com"
         }
       ],
-      "destination": "https://sicoinx.com/:path",
+      "destination": "https://www.sicoinx.com/:path",
       "permanent": true
     },
     {

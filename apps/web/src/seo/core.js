@@ -19,7 +19,7 @@
  */
 
 export const SITE = {
-  url: 'https://sicoinx.com',
+  url: 'https://www.sicoinx.com',
   name: 'SI Coin',
   alternateNames: ['SICOINX', 'SI Coin Ecosystem'],
   legalName: 'SI Coin Ecosystem Foundation',

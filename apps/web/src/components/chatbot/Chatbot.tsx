@@ -14,6 +14,8 @@ import './chatbot.css'
 
 const MAX_INPUT = 600
 const MAX_HISTORY = 12
+// Phones (and landscape phones) get a full-screen sheet instead of a floating panel. Keep in sync with chatbot.css.
+const SHEET_QUERY = '(max-width: 520px), (max-height: 500px)'
 
 /* ---------- tiny, safe Markdown renderer (no innerHTML) ---------- */
 
@@ -257,6 +259,7 @@ export default function Chatbot({
   const [busy, setBusy] = useState(false)
   const [showTeaser, setShowTeaser] = useState(false)
 
+  const rootRef = useRef<HTMLDivElement>(null)
   const logRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const launcherRef = useRef<HTMLButtonElement>(null)
@@ -289,18 +292,41 @@ export default function Chatbot({
     if (open && el && stickRef.current) el.scrollTop = el.scrollHeight
   }, [messages, open, busy])
 
-  // On phones the chat is a full-screen sheet: stop the page behind it from scrolling.
+  // On phones the chat is a full-screen sheet: stop the page behind it from scrolling, and keep the sheet
+  // fitted to the *visible* area. The on-screen keyboard does not shrink the layout viewport (100dvh) on most
+  // phones, so without this it would cover the message box. visualViewport reports what is really visible.
   useEffect(() => {
-    if (!open || !window.matchMedia('(max-width: 520px)').matches) return
-    const prev = document.body.style.overflow
+    if (!open || !window.matchMedia(SHEET_QUERY).matches) return
+    const root = rootRef.current
+    const vv = window.visualViewport
+    const prevOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
+    let tallest = 0
+    const sync = () => {
+      if (root && vv) {
+        tallest = Math.max(tallest, vv.height)
+        root.style.setProperty('--cbx-vvh', `${Math.round(vv.height)}px`)
+        root.style.setProperty('--cbx-vvt', `${Math.round(vv.offsetTop)}px`)
+        root.classList.toggle('is-kb', tallest - vv.height > 120)
+      }
+      const el = logRef.current
+      if (el && stickRef.current) el.scrollTop = el.scrollHeight
+    }
+    sync()
+    vv?.addEventListener('resize', sync)
+    vv?.addEventListener('scroll', sync)
     return () => {
-      document.body.style.overflow = prev
+      vv?.removeEventListener('resize', sync)
+      vv?.removeEventListener('scroll', sync)
+      root?.style.removeProperty('--cbx-vvh')
+      root?.style.removeProperty('--cbx-vvt')
+      root?.classList.remove('is-kb')
+      document.body.style.overflow = prevOverflow
     }
   }, [open])
 
   useEffect(() => {
-    if (open) {
+    if (open && !window.matchMedia(SHEET_QUERY).matches) {
       const t = setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 60)
       return () => clearTimeout(t)
     }
@@ -417,7 +443,7 @@ export default function Chatbot({
       onNavigate(href) // in-app navigation: no full page reload
     }
     // on phones the chat covers the page, so step aside once a link inside the site is followed
-    if (internal && window.matchMedia('(max-width: 520px)').matches) setOpen(false)
+    if (internal && window.matchMedia(SHEET_QUERY).matches) setOpen(false)
   }
 
   const onScroll = () => {
@@ -444,7 +470,7 @@ export default function Chatbot({
   const chips = messages.length === 0 ? suggestions : lastReply?.chips?.length ? lastReply.chips : []
 
   return (
-    <div className={`cbx${open ? ' is-open' : ''}`} style={theme as CSSProperties}>
+    <div ref={rootRef} className={`cbx${open ? ' is-open' : ''}`} style={theme as CSSProperties}>
       <div className="cbx-wrap">
         {open && (
           <section className="cbx-panel" role="dialog" aria-label={`${name} chat`}>

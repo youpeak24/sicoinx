@@ -92,7 +92,7 @@ for (const [p, cfg] of Object.entries(PAGES)) {
   for (const k of ['og:title', 'og:description', 'og:url', 'og:image', 'og:type', 'og:site_name']) {
     ok(!!metaContent(html, k, 'property'), `${p}: ${k} missing`);
   }
-  ok(/^https:\/\/sicoinx\.com\//.test(metaContent(html, 'og:image', 'property') ?? ''), `${p}: og:image must be absolute https URL`);
+  ok(/^https:\/\/www\.sicoinx\.com\//.test(metaContent(html, 'og:image', 'property') ?? ''), `${p}: og:image must be absolute https URL`);
   ok(metaContent(html, 'twitter:card') === 'summary_large_image', `${p}: twitter:card missing`);
 
   const blocks = jsonLdBlocks(html);
@@ -208,7 +208,7 @@ for (const rel of ['vercel.json', 'apps/web/vercel.json']) {
   for (const r of cfg.rewrites || []) {
     if (r.destination.startsWith('/')) ok(exists(r.destination.slice(1)), `${rel}: rewrite destination ${r.destination} missing from dist`);
   }
-  ok((cfg.redirects || []).some((r) => r.has?.some((h) => h.value === 'www.sicoinx.com')), `${rel}: www -> apex redirect missing`);
+  ok((cfg.redirects || []).some((r) => r.has?.some((h) => h.value === 'sicoinx.com')), `${rel}: apex -> www redirect missing`);
 }
 
 // ---------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-# robots.txt for https://sicoinx.com
+# robots.txt for https://www.sicoinx.com
 #
 # All public pages are open to every crawler — search engines (Google, Bing,
 # DuckDuckGo, Yandex, Baidu, Apple) and answer/AI engines (GPTBot, ClaudeBot,
@@ -18,4 +18,4 @@ Disallow: /admin
 Disallow: /shell-private
 Disallow: /shell-article
 
-Sitemap: https://sicoinx.com/sitemap.xml
+Sitemap: https://www.sicoinx.com/sitemap.xml
