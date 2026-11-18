@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SICOINX Visiting Card - Double-Sided Showcase</title>
+  
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 2400px;
+      height: 1400px;
+      background: radial-gradient(120% 120% at 50% 10%, #0A162B 0%, #060D1B 50%, #03060C 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      position: relative;
+    }
+
+    /* Ambient lighting across the stage */
+    .ambient-glow-1 {
+      position: absolute;
+      top: -150px;
+      left: 20%;
+      width: 900px;
+      height: 900px;
+      background: radial-gradient(circle, rgba(0, 240, 255, 0.15) 0%, rgba(23, 92, 255, 0.05) 50%, transparent 70%);
+      filter: blur(80px);
+      pointer-events-none;
+    }
+    .ambient-glow-2 {
+      position: absolute;
+      bottom: -150px;
+      right: 20%;
+      width: 900px;
+      height: 900px;
+      background: radial-gradient(circle, rgba(23, 92, 255, 0.18) 0%, rgba(139, 92, 246, 0.08) 50%, transparent 70%);
+      filter: blur(80px);
+      pointer-events-none;
+    }
+
+    /* Subtle stage grid floor */
+    .stage-floor {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 80px 80px;
+      opacity: 0.6;
+      mask-image: radial-gradient(circle at 50% 50%, black 30%, transparent 75%);
+      -webkit-mask-image: radial-gradient(circle at 50% 50%, black 30%, transparent 75%);
+      pointer-events-none;
+    }
+
+    /* Showcase Header */
+    .showcase-header {
+      text-align: center;
+      margin-bottom: 50px;
+      position: relative;
+      z-index: 5;
+    }
+    .header-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 22px;
+      background: rgba(23, 92, 255, 0.12);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      border-radius: 100px;
+      margin-bottom: 16px;
+    }
+    .pill-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10B981;
+      box-shadow: 0 0 10px #10B981;
+    }
+    .pill-text {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #00F0FF;
+      text-transform: uppercase;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .showcase-title {
+      font-size: 54px;
+      font-weight: 900;
+      color: #FFFFFF;
+      letter-spacing: -1px;
+      line-height: 1.1;
+    }
+    .showcase-title span {
+      background: linear-gradient(135deg, #00F0FF 0%, #175CFF 60%, #10B981 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .showcase-sub {
+      font-size: 18px;
+      color: #94A3B8;
+      margin-top: 10px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Cards Stage */
+    .cards-stage {
+      display: flex;
+      justify-content: center;
+      gap: 70px;
+      position: relative;
+      z-index: 5;
+      perspective: 1600px;
+    }
+    .card-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      transform-style: preserve-3d;
+      transition: transform 0.3s ease;
+    }
+    .card-wrapper.front-wrap {
+      transform: rotateY(-6deg) rotateX(4deg) translateY(-10px);
+    }
+    .card-wrapper.back-wrap {
+      transform: rotateY(6deg) rotateX(4deg) translateY(10px);
+    }
+
+    .card-frame {
+      width: 1000px;
+      height: 572px;
+      border-radius: 30px;
+      overflow: hidden;
+      box-shadow: 
+        0 40px 90px -20px rgba(0, 0, 0, 0.95),
+        0 0 60px -10px rgba(0, 240, 255, 0.25),
+        0 0 0 1px rgba(0, 240, 255, 0.3);
+      position: relative;
+    }
+    .card-frame iframe {
+      width: 1050px;
+      height: 600px;
+      border: none;
+      transform: scale(0.95238);
+      transform-origin: top left;
+      pointer-events: none;
+    }
+
+    .side-label {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      color: #00F0FF;
+      text-transform: uppercase;
+      font-family: 'Space Grotesk', sans-serif;
+      padding: 8px 24px;
+      border-radius: 100px;
+      background: rgba(10, 25, 47, 0.85);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient-glow-1"></div>
+  <div class="ambient-glow-2"></div>
+  <div class="stage-floor"></div>
+
+  <!-- Showcase Header -->
+  <div class="showcase-header">
+    <div class="header-pill">
+      <span class="pill-dot"></span>
+      <span class="pill-text">SICOINX Official Executive Identity</span>
+    </div>
+    <h1 class="showcase-title">Double-Sided <span>Executive Visiting Card</span></h1>
+    <p class="showcase-sub">Precision-Engineered Luxury Titanium Finish • Audited Protocol Credential</p>
+  </div>
+
+  <!-- Cards Stage -->
+  <div class="cards-stage">
+    <!-- FRONT SIDE -->
+    <div class="card-wrapper front-wrap">
+      <div class="card-frame">
+        <iframe src="front.html"></iframe>
+      </div>
+      <span class="side-label">Side A • Brand Presence</span>
+    </div>
+
+    <!-- BACK SIDE -->
+    <div class="card-wrapper back-wrap">
+      <div class="card-frame">
+        <iframe src="back.html"></iframe>
+      </div>
+      <span class="side-label">Side B • Executive Contact & QR</span>
+    </div>
+  </div>
+</body>
+</html>
