@@ -17,10 +17,13 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/site.webmanifest" />
+    <!-- use-credentials lets the manifest load on password-protected Vercel preview deployments (otherwise the
+         cookie-less request is redirected to Vercel's login and blocked by CORS). Harmless on public domains. -->
+    <link rel="manifest" href="/site.webmanifest" crossorigin="use-credentials" />
     <meta name="theme-color" content="#175CFF" />
     <meta name="application-name" content="SI Coin" />
     <meta name="apple-mobile-web-app-title" content="SI Coin" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="format-detection" content="telephone=no" />
     <meta name="author" content="SI Coin" />

@@ -18,7 +18,23 @@ const firebaseConfig = {
 
 export const isFirebaseConfigured = Boolean(firebaseConfig.apiKey && firebaseConfig.projectId);
 
-export const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+if (!isFirebaseConfigured && typeof console !== 'undefined') {
+  console.warn(
+    'Firebase is not configured: set the VITE_FIREBASE_* variables (see apps/web/.env.example) in .env or in the ' +
+      'Vercel project settings, then rebuild. Public pages still work; sign-in is disabled.',
+  );
+}
+
+// getAuth() throws "auth/invalid-api-key" at import time when the key is missing, which would stop the whole
+// app from mounting. Without a config we initialise with inert placeholders instead: every auth/Firestore code
+// path is already gated on isFirebaseConfigured, so nothing is ever sent to Firebase in that state.
+export const app = getApps().length
+  ? getApp()
+  : initializeApp(
+      isFirebaseConfigured
+        ? firebaseConfig
+        : { ...firebaseConfig, apiKey: 'not-configured', projectId: 'not-configured', appId: 'not-configured' },
+    );
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
