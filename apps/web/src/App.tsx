@@ -22,6 +22,10 @@ const AdminLayout = lazyPage(() => import('./components/layout/AdminLayout'), 'A
 // Public Pages
 const AboutPage = lazyPage(() => import('./pages/public/AboutPage'), 'AboutPage');
 const EcosystemPage = lazyPage(() => import('./pages/public/EcosystemPage'), 'EcosystemPage');
+const WalletsDirectoryPage = lazyPage(() => import('./pages/public/WalletsDirectoryPage'), 'WalletsDirectoryPage');
+const WalletDetailPage = lazyPage(() => import('./pages/public/WalletDetailPage'), 'WalletDetailPage');
+const WalletComparePage = lazyPage(() => import('./pages/public/WalletComparePage'), 'WalletComparePage');
+const WalletGuidePage = lazyPage(() => import('./pages/public/WalletGuidePage'), 'WalletGuidePage');
 const TokenomicsPage = lazyPage(() => import('./pages/public/TokenomicsPage'), 'TokenomicsPage');
 const RoadmapPage = lazyPage(() => import('./pages/public/RoadmapPage'), 'RoadmapPage');
 const MarketPage = lazyPage(() => import('./pages/public/MarketPage'), 'MarketPage');
@@ -105,6 +109,10 @@ export const App: React.FC = () => {
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<S><AboutPage /></S>} />
           <Route path="/ecosystem" element={<S><EcosystemPage /></S>} />
+          <Route path="/wallets" element={<S><WalletsDirectoryPage /></S>} />
+          <Route path="/wallets/guide" element={<S><WalletGuidePage /></S>} />
+          <Route path="/wallets/compare" element={<S><WalletComparePage /></S>} />
+          <Route path="/wallets/:id" element={<S><WalletDetailPage /></S>} />
           <Route path="/tokenomics" element={<S><TokenomicsPage /></S>} />
           <Route path="/roadmap" element={<S><RoadmapPage /></S>} />
           <Route path="/market" element={<S><MarketPage /></S>} />

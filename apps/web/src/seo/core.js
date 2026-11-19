@@ -3,6 +3,8 @@
 // Node post-build script (scripts/seo-postbuild.mjs) that generates the static
 // per-page HTML, sitemap.xml and robots.txt. Keep it free of browser/Node APIs.
 
+import { WALLETS, walletSeo } from '../data/wallets.js';
+
 /**
  * @typedef {Object} PageConfig
  * @property {string} title          Full <title> (target <= 60 chars).
@@ -15,6 +17,7 @@
  * @property {boolean} index         true = indexable and listed in sitemap.xml.
  * @property {string} [changefreq]
  * @property {number} [priority]
+ * @property {string} [parent]       Parent page path; adds a middle level to the BreadcrumbList.
  * @property {string} [source]       Source file (relative to apps/web) for sitemap <lastmod>.
  */
 
@@ -99,6 +102,56 @@ export const PAGES = {
     changefreq: 'weekly',
     priority: 0.7,
     source: 'src/pages/public/EcosystemPage.tsx',
+  },
+  '/wallets': {
+    title: 'Crypto Wallets for SI Coin — Compare Software & Hardware',
+    description:
+      'Compare software, hardware and developer wallets side by side and learn how to keep your own keys safe. SI Coin is non-custodial: you hold your keys.',
+    h1: 'Find the right wallet for your SI Coin.',
+    lead:
+      'Compare software wallets, hardware devices and developer wallet tools side by side. SI Coin is non-custodial: you hold your own keys, so the wallet you choose is your access.',
+    points: [
+      'Software, hardware and developer wallets in one directory',
+      'Filter by platform and compare up to three wallets',
+      'Listings are informational, not endorsements or certifications',
+      'SI Coin never asks for your recovery phrase',
+    ],
+    breadcrumb: 'Wallets',
+    schemaType: 'CollectionPage',
+    index: true,
+    changefreq: 'weekly',
+    priority: 0.8,
+    source: 'src/data/wallets.js',
+  },
+  '/wallets/guide': {
+    title: 'Wallet Safety Guide — Choose & Secure Your Wallet | SI Coin',
+    description:
+      'How to choose a crypto wallet and keep it safe: protecting your recovery phrase, spotting scams, sending carefully and what SI Coin will never ask of you.',
+    h1: 'How to choose and secure a wallet',
+    lead:
+      'With a non-custodial wallet you are your own bank, and that comes with responsibility. These habits prevent most losses.',
+    points: [
+      'Choose a wallet type that fits how you will use it',
+      'Protect your recovery phrase and never share it',
+      'Recognise common scams and risky approvals',
+      'SI Coin will never ask for your recovery phrase or private key',
+    ],
+    breadcrumb: 'Safety guide',
+    parent: '/wallets',
+    schemaType: 'WebPage',
+    index: true,
+    changefreq: 'monthly',
+    priority: 0.6,
+    source: 'src/pages/public/WalletGuidePage.tsx',
+  },
+  '/wallets/compare': {
+    title: 'Compare Wallets | SI Coin',
+    description: 'Compare up to three crypto wallets side by side: platforms, type and notes.',
+    h1: 'Compare wallets',
+    lead: 'Pick two or three wallets to compare platforms, type and notes side by side.',
+    breadcrumb: 'Compare',
+    parent: '/wallets',
+    index: false,
   },
   '/tokenomics': {
     title: 'SI Coin Tokenomics — 100M Fixed Supply & Linear Vesting',
@@ -282,6 +335,20 @@ export const PAGES = {
   },
 };
 
+// One page per wallet (/wallets/:id), generated from src/data/wallets.js so the list can never drift
+// from the prerendered pages, the sitemap or the router.
+for (const w of WALLETS) {
+  PAGES[`/wallets/${w.id}`] = {
+    ...walletSeo(w),
+    parent: '/wallets',
+    schemaType: 'WebPage',
+    index: true,
+    changefreq: 'monthly',
+    priority: 0.5,
+    source: 'src/data/wallets.js',
+  };
+}
+
 /** Generic metadata for sections that must never be indexed. */
 export const PRIVATE_SECTIONS = {
   '/dashboard': {
@@ -303,6 +370,7 @@ export const NOT_FOUND = {
 export const NAV_LINKS = [
   ['/about', 'About'],
   ['/ecosystem', 'Ecosystem'],
+  ['/wallets', 'Wallets'],
   ['/tokenomics', 'Tokenomics'],
   ['/market', 'Market'],
   ['/roadmap', 'Roadmap'],
@@ -390,10 +458,13 @@ export function websiteJsonLd() {
   };
 }
 
-function breadcrumbList(path, label, canonical) {
+function breadcrumbList(path, label, canonical, parent) {
   const items = [{ '@type': 'ListItem', position: 1, name: 'Home', item: absoluteUrl('/') }];
   if (path !== '/') {
-    items.push({ '@type': 'ListItem', position: 2, name: label, item: canonical });
+    if (parent && PAGES[parent]) {
+      items.push({ '@type': 'ListItem', position: items.length + 1, name: PAGES[parent].breadcrumb, item: absoluteUrl(parent) });
+    }
+    items.push({ '@type': 'ListItem', position: items.length + 1, name: label, item: canonical });
   }
   return { '@type': 'BreadcrumbList', '@id': `${canonical}#breadcrumb`, itemListElement: items };
 }
@@ -414,7 +485,7 @@ export function pageJsonLd(path, cfg) {
       primaryImageOfPage: { '@type': 'ImageObject', url: `${SITE.url}${SITE.ogImage}`, width: SITE.ogImageWidth, height: SITE.ogImageHeight },
       breadcrumb: { '@id': `${canonical}#breadcrumb` },
     },
-    breadcrumbList(path, cfg.breadcrumb, canonical),
+    breadcrumbList(path, cfg.breadcrumb, canonical, cfg.parent),
   ];
   if (path === '/') {
     graph[0]['@type'] = 'WebPage';

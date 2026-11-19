@@ -9,7 +9,7 @@
     "seo:sitemap": "node scripts/seo-postbuild.mjs --sitemap",
     "seo:check": "node scripts/seo-verify.mjs",
     "preview": "vite preview",
-    "test": "tsc --noEmit"
+    "test": "tsc --noEmit && node --test scripts/wallets.test.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",

@@ -23,6 +23,7 @@ export const Navbar: React.FC = () => {
   const navLinks = [
     { label: 'About', path: '/about' },
     { label: 'Ecosystem', path: '/ecosystem' },
+    { label: 'Wallets', path: '/wallets' },
     { label: 'Tokenomics', path: '/tokenomics' },
     { label: 'Market & Graph', path: '/market' },
     { label: 'Roadmap', path: '/roadmap' },

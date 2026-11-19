@@ -64,6 +64,8 @@ export const Footer: React.FC = () => {
           <div>
             <h4 className="font-bold text-xs text-[#10213A] mb-3.5 tracking-wider uppercase">Resources</h4>
             <ul className="space-y-2.5 text-sm text-[#64748B]">
+              <li><Link to="/wallets" className="hover:text-[#175CFF] hover:translate-x-1 inline-block transition-all">Wallet Directory</Link></li>
+              <li><Link to="/wallets/guide" className="hover:text-[#175CFF] hover:translate-x-1 inline-block transition-all">Wallet Safety Guide</Link></li>
               <li><Link to="/ecosystem" className="hover:text-[#175CFF] hover:translate-x-1 inline-block transition-all">Ecosystem Directory</Link></li>
               <li><Link to="/announcements" className="hover:text-[#175CFF] hover:translate-x-1 inline-block transition-all">Official Announcements</Link></li>
               <li><Link to="/faq" className="hover:text-[#175CFF] hover:translate-x-1 inline-block transition-all">Frequently Asked Questions</Link></li>

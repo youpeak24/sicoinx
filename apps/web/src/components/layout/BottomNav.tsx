@@ -34,9 +34,12 @@ export const BottomNav: React.FC = () => {
     },
     {
       label: 'Wallet',
-      path: user ? '/dashboard/wallets' : '/login',
+      path: user ? '/dashboard/wallets' : '/wallets',
       icon: Wallet,
-      active: pathname.startsWith('/dashboard/wallets') || pathname.startsWith('/dashboard/portfolio'),
+      active:
+        pathname.startsWith('/dashboard/wallets') ||
+        pathname.startsWith('/dashboard/portfolio') ||
+        pathname === '/wallets',
     },
     {
       label: 'Profile',
