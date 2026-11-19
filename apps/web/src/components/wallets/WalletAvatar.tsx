@@ -1,8 +1,8 @@
 import React from 'react';
+import { WALLET_LOGO_MAP } from './WalletLogos';
 
 /**
- * Brand-neutral monogram tile. We deliberately do not redraw third-party logos: they are trademarks, and
- * the official artwork should only be used under each provider's brand guidelines.
+ * Authentic vector logos for all ecosystem wallets, with fallback to monogram gradient.
  */
 const PALETTE: [string, string][] = [
   ['#175CFF', '#38BDF8'],
@@ -41,6 +41,19 @@ interface WalletAvatarProps {
 const SIZES = { sm: 'w-9 h-9 text-xs rounded-xl', md: 'w-12 h-12 text-sm rounded-2xl', lg: 'w-20 h-20 text-2xl rounded-3xl' };
 
 export const WalletAvatar: React.FC<WalletAvatarProps> = ({ id, name, size = 'md', className = '' }) => {
+  const LogoComponent = WALLET_LOGO_MAP[id.toLowerCase()];
+
+  if (LogoComponent) {
+    return (
+      <span
+        aria-label={`${name} logo`}
+        className={`inline-flex shrink-0 items-center justify-center overflow-hidden shadow-xs border border-[#DFE8F5]/80 select-none transition-transform duration-200 group-hover:scale-105 ${SIZES[size]} ${className}`}
+      >
+        <LogoComponent className="w-full h-full object-contain" />
+      </span>
+    );
+  }
+
   const [from, to] = PALETTE[hash(id) % PALETTE.length];
   return (
     <span

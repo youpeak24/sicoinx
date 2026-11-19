@@ -25,7 +25,7 @@ export const Navbar: React.FC = () => {
     { label: 'Ecosystem', path: '/ecosystem' },
     { label: 'Wallets', path: '/wallets' },
     { label: 'Tokenomics', path: '/tokenomics' },
-    { label: 'Market & Graph', path: '/market' },
+    { label: 'Market & Graph', shortLabel: 'Market', path: '/market' },
     { label: 'Roadmap', path: '/roadmap' },
     { label: 'Whitepaper', path: '/whitepaper' },
     { label: 'FAQ', path: '/faq' },
@@ -41,27 +41,36 @@ export const Navbar: React.FC = () => {
           : 'bg-white/80 backdrop-blur-md border-b border-[#DFE8F5]/60'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 h-20 flex items-center justify-between gap-2 xl:gap-4">
         {/* Logo with hover scale */}
-        <div className="transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]">
+        <div className="shrink-0 transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]">
           <SiLogo size="md" />
         </div>
 
         {/* Desktop Navigation Links with animated indicator */}
-        <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
+        <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1.5 2xl:gap-2 shrink-0">
           {navLinks.map((link) => {
             const active = isActive(link.path);
             return (
               <Link
                 key={link.path}
                 to={link.path}
-                className={`relative px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                className={`relative inline-flex items-center justify-center px-2 xl:px-3 py-2 rounded-xl text-xs xl:text-sm font-medium whitespace-nowrap transition-all duration-200 shrink-0 ${
                   active
                     ? 'text-[#175CFF] font-semibold'
                     : 'text-[#64748B] hover:text-[#10213A] hover:bg-[#F7FAFF]'
                 }`}
               >
-                {link.label}
+                <span>
+                  {link.shortLabel ? (
+                    <>
+                      <span className="xl:hidden">{link.shortLabel}</span>
+                      <span className="hidden xl:inline">{link.label}</span>
+                    </>
+                  ) : (
+                    link.label
+                  )}
+                </span>
                 {active && (
                   <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-[#175CFF] rounded-full animate-fade-in shadow-xs" />
                 )}
@@ -71,51 +80,51 @@ export const Navbar: React.FC = () => {
         </nav>
 
         {/* Right Action Buttons */}
-        <div className="hidden lg:flex items-center gap-3">
+        <div className="hidden lg:flex items-center gap-2 xl:gap-3 shrink-0">
           {/* Quick Buy SI Button */}
           <Link
             to={user ? '/dashboard/purchase' : '/buy'}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-extrabold text-white bg-gradient-to-r from-[#123B9A] via-[#175CFF] to-[#38BDF8] shadow-elevated hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5 active:scale-95"
+            className="inline-flex items-center gap-1.5 px-3 xl:px-4 py-2 rounded-xl text-xs font-extrabold text-white bg-gradient-to-r from-[#123B9A] via-[#175CFF] to-[#38BDF8] shadow-elevated hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap shrink-0"
           >
-            <ShoppingBag className="w-3.5 h-3.5" />
+            <ShoppingBag className="w-3.5 h-3.5 shrink-0" />
             <span>{ratesLoaded ? `Buy SI ($${referencePriceUsd.toFixed(2)})` : 'Buy SI'}</span>
           </Link>
 
           {user ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 xl:gap-3 shrink-0">
               {isStaff && (
                 <Link
                   to="/admin"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#EDF4FF] text-[#123B9A] hover:bg-[#DFE8F5] border border-[#DFE8F5] transition-all duration-200 hover:-translate-y-0.5 shadow-xs"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-[#EDF4FF] text-[#123B9A] hover:bg-[#DFE8F5] border border-[#DFE8F5] transition-all duration-200 hover:-translate-y-0.5 shadow-xs whitespace-nowrap shrink-0"
                 >
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#175CFF]" />
-                  Admin Panel
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#175CFF] shrink-0" />
+                  <span>Admin Panel</span>
                 </Link>
               )}
               <Link
                 to="/dashboard"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#175CFF] hover:bg-[#123B9A] shadow-elevated transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
+                className="inline-flex items-center gap-2 px-3.5 xl:px-4 py-2 rounded-xl text-xs xl:text-sm font-semibold text-white bg-[#175CFF] hover:bg-[#123B9A] shadow-elevated transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98] whitespace-nowrap shrink-0"
               >
-                <User className="w-4 h-4" />
+                <User className="w-4 h-4 shrink-0" />
                 <span>Dashboard ({coinBalance.toFixed(0)} SI)</span>
               </Link>
             </div>
           ) : (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 xl:gap-2.5 shrink-0">
               <Link
                 to="/login"
-                className="px-4 py-2 text-sm font-semibold text-[#10213A] hover:text-[#175CFF] transition-colors duration-200"
+                className="px-2.5 xl:px-3.5 py-2 text-xs xl:text-sm font-semibold text-[#10213A] hover:text-[#175CFF] transition-colors duration-200 whitespace-nowrap shrink-0"
               >
                 Sign In
               </Link>
               <Link
                 to="/register"
-                className="relative overflow-hidden inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#175CFF] hover:bg-[#123B9A] shadow-elevated transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] group"
+                className="relative overflow-hidden inline-flex items-center gap-1.5 px-3 xl:px-4 py-2 rounded-xl text-xs xl:text-sm font-semibold text-white bg-[#175CFF] hover:bg-[#123B9A] shadow-elevated transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98] group whitespace-nowrap shrink-0"
               >
                 <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out pointer-events-none" />
-                <Sparkles className="w-3.5 h-3.5 text-white/80" />
-                <span>Get Started</span>
-                <ArrowUpRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                <Sparkles className="w-3.5 h-3.5 text-white/80 shrink-0" />
+                <span className="whitespace-nowrap">Get Started</span>
+                <ArrowUpRight className="w-3.5 h-3.5 xl:w-4 xl:h-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 shrink-0" />
               </Link>
             </div>
           )}
