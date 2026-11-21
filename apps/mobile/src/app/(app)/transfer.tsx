@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import { StyleSheet, Text, View, type TextInputInstance } from 'react-native';
@@ -63,6 +64,9 @@ export default function TransferScreen() {
     return (
       <Screen insetBottom>
         <Card style={styles.done}>
+          <View style={styles.successBadge}>
+            <Ionicons name="paper-plane" size={34} color={colors.white} />
+          </View>
           <Text style={styles.doneTitle}>Transfer complete</Text>
           <Text style={styles.doneBody}>
             Sent {sent.amount} SI.{'\n'}Reference {sent.reference}
@@ -104,6 +108,11 @@ export default function TransferScreen() {
 
   return (
     <Screen insetBottom>
+      <View style={styles.balanceStrip}>
+        <Text style={styles.balanceLabel}>Available balance</Text>
+        <Text style={styles.balanceValue}>{formatCoin(balance)} SI</Text>
+      </View>
+
       {frozen ? <Banner tone="error" message="Your wallet is frozen. Contact support to make transfers." /> : null}
       {error ? <Banner tone="error" message={error} /> : null}
 
@@ -113,6 +122,7 @@ export default function TransferScreen() {
       <Card>
         <TextField
           label={toApp ? 'YouPeak username or email' : 'Recipient email or wallet ID'}
+          icon={toApp ? 'at-outline' : 'person-outline'}
           value={recipient}
           onChangeText={setRecipient}
           placeholder={toApp ? 'user@youpeak.live' : 'name@example.com or SICX-…'}
@@ -140,6 +150,7 @@ export default function TransferScreen() {
         />
         <TextField
           label="Note (optional)"
+          icon="create-outline"
           value={note}
           onChangeText={setNote}
           placeholder="e.g. Subscription payment"
@@ -151,17 +162,26 @@ export default function TransferScreen() {
       </Card>
 
       <Button title="Send coins" icon="paper-plane" onPress={submit} loading={submitting} disabled={frozen} />
-      <View>
-        <Text style={styles.footnote}>Transfers within the ecosystem are final and cannot be reversed.</Text>
-      </View>
+      <Text style={styles.footnote}>Transfers within the ecosystem are final and cannot be reversed.</Text>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
+  balanceStrip: {
+    backgroundColor: colors.paleBlue,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#CFE0FF',
+    padding: 16,
+    gap: 2,
+  },
+  balanceLabel: { fontSize: 12, fontWeight: '700', color: colors.muted },
+  balanceValue: { fontSize: 22, fontWeight: '900', color: colors.text, letterSpacing: -0.4 },
   done: { alignItems: 'center', paddingVertical: 28 },
-  doneTitle: { fontSize: 18, fontWeight: '900', color: colors.text, textAlign: 'center' },
-  doneBody: { fontSize: 13, color: colors.muted, textAlign: 'center', lineHeight: 20 },
+  successBadge: { width: 72, height: 72, borderRadius: 36, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
+  doneTitle: { fontSize: 20, fontWeight: '900', color: colors.text, textAlign: 'center', letterSpacing: -0.3 },
+  doneBody: { fontSize: 14, color: colors.muted, textAlign: 'center', lineHeight: 22 },
   fullWidth: { alignSelf: 'stretch' },
-  footnote: { fontSize: 11, color: colors.muted, textAlign: 'center' },
+  footnote: { fontSize: 12, color: colors.muted, textAlign: 'center' },
 });

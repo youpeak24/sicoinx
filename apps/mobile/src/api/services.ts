@@ -1,5 +1,6 @@
 import { ApiError, request, requestEnvelope } from './client';
 import type {
+  AppNotification,
   BuyOrderIntent,
   KycRecord,
   KycSubmitInput,
@@ -19,7 +20,28 @@ import type {
   WalletOverview,
 } from './types';
 
-// ─── Authentication ──────────────────────────────────────────────────────────
+// ─── Account ─────────────────────────────────────────────────────────────────
+// The app signs in with Firebase (see src/auth). The API identifies the caller from the Firebase ID token.
+
+export async function fetchCurrentUser(): Promise<User> {
+  const data = await request<{ user: User }>('/auth/me');
+  return data.user;
+}
+
+export function updateProfileName(name: string): Promise<User> {
+  return request<User>('/user/profile', { method: 'PATCH', body: { name: name.trim() } });
+}
+
+export function getNotifications(signal?: AbortSignal): Promise<AppNotification[]> {
+  return request<AppNotification[]>('/user/notifications', { signal });
+}
+
+export async function markNotificationRead(id: string): Promise<void> {
+  await request(`/user/notifications/${encodeURIComponent(id)}/read`, { method: 'PATCH' });
+}
+
+// ─── Legacy API-session authentication ───────────────────────────────────────
+// Kept for the end-to-end tests, which exercise the API's own sign-in. The app itself uses Firebase.
 
 export async function login(email: string, password: string, mfaCode?: string): Promise<LoginResult> {
   const envelope = await requestEnvelope('/auth/login', {
@@ -57,11 +79,6 @@ export async function register(input: {
     throw new ApiError('Account created but the server sent no session. Please sign in.', 'BAD_RESPONSE');
   }
   return data;
-}
-
-export async function fetchCurrentUser(): Promise<User> {
-  const data = await request<{ user: User }>('/auth/me');
-  return data.user;
 }
 
 export async function logout(): Promise<void> {

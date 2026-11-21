@@ -36,3 +36,42 @@ export function resolveApiBaseUrl(): string | null {
 }
 
 export const REQUEST_TIMEOUT_MS = 20000;
+
+// ─── Firebase ────────────────────────────────────────────────────────────────
+
+export interface FirebaseWebConfig {
+  apiKey: string;
+  authDomain: string;
+  projectId: string;
+  appId?: string;
+  storageBucket?: string;
+  messagingSenderId?: string;
+}
+
+/**
+ * The Firebase web config of project "sicoinx" (the same project the website uses). These are public client
+ * identifiers, supplied through EXPO_PUBLIC_FIREBASE_* (see .env.example). Each variable must be referenced
+ * literally so Expo can inline it into the bundle.
+ */
+export function resolveFirebaseConfig(): FirebaseWebConfig | null {
+  const apiKey = process.env.EXPO_PUBLIC_FIREBASE_API_KEY?.trim();
+  const authDomain = process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN?.trim();
+  const projectId = process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID?.trim();
+  if (!apiKey || !authDomain || !projectId) return null;
+  return {
+    apiKey,
+    authDomain,
+    projectId,
+    appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID?.trim() || undefined,
+    storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET?.trim() || undefined,
+    messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID?.trim() || undefined,
+  };
+}
+
+export const FIREBASE_NOT_CONFIGURED_MESSAGE =
+  'Firebase is not configured for this build. Set the EXPO_PUBLIC_FIREBASE_* variables and restart.';
+
+// ─── Website links ───────────────────────────────────────────────────────────
+
+/** Public website, used for legal pages and help links. */
+export const WEB_URL = (process.env.EXPO_PUBLIC_WEB_URL?.trim() || 'https://www.sicoinx.com').replace(/\/+$/, '');

@@ -1,181 +1,307 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, type Href } from 'expo-router';
-import type { ComponentProps } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useState, type ComponentProps } from 'react';
+import { Pressable, Share, StyleSheet, Text, View } from 'react-native';
 
-import { getTransactions, getWallet } from '@/api/services';
+import { getNotifications, getTransactions, getWallet } from '@/api/services';
+import { Backdrop } from '@/components/Backdrop';
 import { Banner } from '@/components/Banner';
-import { Card } from '@/components/Card';
+import { Button } from '@/components/Button';
+import { Card, IconChip, SectionHeader } from '@/components/Card';
+import { HomeHeader } from '@/components/Headers';
 import { Screen } from '@/components/Screen';
+import { Sheet } from '@/components/Sheet';
 import { ErrorView, LoadingView } from '@/components/State';
 import { TransactionRow } from '@/components/TransactionRow';
 import { formatCoin, formatInr, formatUsd } from '@/lib/money';
 import { useResource } from '@/lib/useResource';
-import { colors, radius } from '@/theme';
+import { colors, radius, shadow, type ChipTone } from '@/theme';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
 
-const ACTIONS: { label: string; icon: IconName; href: Href; tint: string }[] = [
-  { label: 'Buy Coins', icon: 'add-circle-outline', href: '/buy', tint: colors.primary },
-  { label: 'Sell to Bank', icon: 'business-outline', href: '/sell', tint: colors.primaryDeep },
-  { label: 'Transfer', icon: 'paper-plane-outline', href: '/transfer', tint: colors.sky },
+const ACTIONS: { label: string; icon: IconName; tone: ChipTone; href: Href }[] = [
+  { label: 'Buy', icon: 'add', tone: 'blue', href: '/buy' },
+  { label: 'Sell', icon: 'business-outline', tone: 'amber', href: '/sell' },
+  { label: 'Send', icon: 'paper-plane-outline', tone: 'violet', href: '/transfer' },
 ];
 
 export default function WalletScreen() {
   const router = useRouter();
+  const [hidden, setHidden] = useState(false);
+  const [receiving, setReceiving] = useState(false);
+  const [shareError, setShareError] = useState<string | null>(null);
+
   const { data, error, loading, refreshing, reload, refresh } = useResource(
     async (signal) => {
-      const [overview, txs] = await Promise.all([getWallet(signal), getTransactions('ALL', 1, 5, signal)]);
-      return { overview, transactions: txs.transactions };
+      const [overview, txs, notifications] = await Promise.all([
+        getWallet(signal),
+        getTransactions('ALL', 1, 5, signal),
+        // The bell badge is a nice-to-have: never let it break the wallet.
+        getNotifications(signal).catch(() => []),
+      ]);
+      return {
+        overview,
+        transactions: txs.transactions,
+        unread: notifications.filter((n) => !n.isRead).length,
+      };
     },
     [],
     { refetchOnFocus: true },
   );
 
-  if (loading && !data) return <LoadingView label="Loading your wallet…" />;
-  if (!data) return <ErrorView message={error ?? 'Could not load your wallet.'} onRetry={reload} />;
+  let body;
+  if (loading && !data) {
+    body = <LoadingView label="Loading your wallet…" />;
+  } else if (!data) {
+    body = <ErrorView message={error ?? 'Could not load your wallet.'} onRetry={reload} />;
+  } else {
+    const { overview, transactions } = data;
+    const { wallet, rates, valuation, kycStatus } = overview;
+    const verified = kycStatus === 'APPROVED';
 
-  const { overview, transactions } = data;
-  const { wallet, rates, valuation, kycStatus } = overview;
-  const verified = kycStatus === 'APPROVED';
+    const shareAddress = async () => {
+      setShareError(null);
+      try {
+        await Share.share({ message: `My SIcoinX wallet address: ${wallet.address}` });
+      } catch {
+        setShareError('Sharing is not available here. Select the address above to copy it.');
+      }
+    };
 
-  return (
-    <Screen refreshing={refreshing} onRefresh={refresh}>
-      {error ? <Banner tone="warning" message={`Couldn't refresh: ${error}`} /> : null}
-      {wallet.isFrozen ? (
-        <Banner
-          tone="error"
-          title="Wallet frozen"
-          message="Your wallet is frozen, so transactions are disabled. Contact support for help."
-        />
-      ) : null}
+    body = (
+      <Screen refreshing={refreshing} onRefresh={refresh}>
+        {error ? <Banner tone="warning" message={`Couldn't refresh: ${error}`} /> : null}
+        {wallet.isFrozen ? (
+          <Banner
+            tone="error"
+            title="Wallet frozen"
+            message="Your wallet is frozen, so transactions are disabled. Contact support for help."
+          />
+        ) : null}
 
-      <View style={styles.walletCard}>
-        <View style={styles.walletTop}>
-          <Text style={styles.walletTitle}>SIcoinX DIGITAL WALLET</Text>
-          <View style={styles.kycBadge}>
-            <Text style={styles.kycBadgeText}>{verified ? 'KYC VERIFIED' : 'KYC PENDING'}</Text>
+        <View style={styles.hero}>
+          <Backdrop />
+          <View style={styles.heroTop}>
+            <View style={styles.heroLabelRow}>
+              <Text style={styles.heroLabel}>Total balance</Text>
+              <Pressable
+                onPress={() => setHidden((h) => !h)}
+                hitSlop={10}
+                accessibilityRole="button"
+                accessibilityLabel={hidden ? 'Show balance' : 'Hide balance'}
+              >
+                <Ionicons name={hidden ? 'eye-off-outline' : 'eye-outline'} size={18} color="rgba(255,255,255,0.8)" />
+              </Pressable>
+            </View>
+            <View style={[styles.kycBadge, verified && styles.kycBadgeOk]}>
+              <Ionicons
+                name={verified ? 'shield-checkmark' : 'shield-outline'}
+                size={12}
+                color={colors.white}
+              />
+              <Text style={styles.kycBadgeText}>{verified ? 'Verified' : 'KYC pending'}</Text>
+            </View>
+          </View>
+
+          <View style={styles.balanceRow}>
+            <Text style={styles.balance} adjustsFontSizeToFit numberOfLines={1} testID="wallet-balance">
+              {hidden ? '••••••' : formatCoin(wallet.coinBalance)}
+            </Text>
+            <Text style={styles.ticker}>SI</Text>
+          </View>
+          <Text style={styles.valuation}>
+            {hidden ? '≈ ••••••' : `≈ ${formatInr(valuation.inr)}  ·  ${formatUsd(valuation.usd)}`}
+          </Text>
+
+          <View style={styles.addressPill}>
+            <Ionicons name="wallet-outline" size={15} color="rgba(255,255,255,0.85)" />
+            <Text style={styles.address} numberOfLines={1} selectable>
+              {wallet.address}
+            </Text>
           </View>
         </View>
-        <Text style={styles.address} selectable>
-          {wallet.address}
-        </Text>
-        <View style={styles.balanceRow}>
-          <Text style={styles.balance} adjustsFontSizeToFit numberOfLines={1}>
-            {formatCoin(wallet.coinBalance)}
-          </Text>
-          <Text style={styles.ticker}>SI</Text>
-        </View>
-        <Text style={styles.valuation}>
-          ≈ {formatInr(valuation.inr)} ({formatUsd(valuation.usd)})
-        </Text>
-      </View>
 
-      <Card style={styles.rates}>
-        <View style={styles.rateCol}>
-          <Text style={styles.rateLabel}>BUY</Text>
-          <Text style={styles.rateValue}>{formatInr(rates.buyPriceInr)}</Text>
-        </View>
-        <View style={styles.rateDivider} />
-        <View style={styles.rateCol}>
-          <Text style={styles.rateLabel}>SELL</Text>
-          <Text style={styles.rateValue}>{formatInr(rates.sellPriceInr)}</Text>
-        </View>
-        <View style={styles.rateDivider} />
-        <View style={styles.rateCol}>
-          <Text style={styles.rateLabel}>USD RATE</Text>
-          <Text style={styles.rateValue}>₹{rates.inrPerUsd}</Text>
-        </View>
-      </Card>
-
-      <View style={styles.actions}>
-        {ACTIONS.map((a) => (
+        <View style={styles.actions}>
+          {ACTIONS.map((a) => (
+            <Pressable
+              key={a.label}
+              onPress={() => router.push(a.href)}
+              accessibilityRole="button"
+              accessibilityLabel={a.label}
+              style={({ pressed }) => [styles.action, pressed && styles.pressed]}
+            >
+              <IconChip name={a.icon} tone={a.tone} size={48} />
+              <Text style={styles.actionLabel}>{a.label}</Text>
+            </Pressable>
+          ))}
           <Pressable
-            key={a.label}
-            onPress={() => router.push(a.href)}
+            onPress={() => setReceiving(true)}
             accessibilityRole="button"
-            accessibilityLabel={a.label}
+            accessibilityLabel="Receive"
             style={({ pressed }) => [styles.action, pressed && styles.pressed]}
           >
-            <Ionicons name={a.icon} size={26} color={a.tint} />
-            <Text style={styles.actionLabel}>{a.label}</Text>
+            <IconChip name="download-outline" tone="green" size={48} />
+            <Text style={styles.actionLabel}>Receive</Text>
           </Pressable>
-        ))}
-      </View>
-
-      <View style={styles.ecosystem}>
-        <View style={styles.ecosystemIcon}>
-          <Ionicons name="git-network-outline" size={22} color={colors.white} />
         </View>
-        <View style={styles.ecosystemText}>
-          <Text style={styles.ecosystemTitle}>Connected ecosystem</Text>
-          <Text style={styles.ecosystemBody}>
-            Send SIcoinX to connected platforms such as YouPeak and YouPeak Shop from the Transfer screen.
-          </Text>
-        </View>
-      </View>
 
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Recent transactions</Text>
-        <Pressable onPress={() => router.navigate('/history')} hitSlop={10} accessibilityRole="link">
-          <Text style={styles.viewAll}>View all</Text>
-        </Pressable>
-      </View>
-
-      {transactions.length === 0 ? (
-        <Card>
-          <Text style={styles.empty}>No transactions yet. Your purchases and transfers will appear here.</Text>
+        <Card style={styles.rates}>
+          <View style={styles.rateCol}>
+            <Text style={styles.rateLabel}>Buy rate</Text>
+            <Text style={styles.rateValue}>{formatInr(rates.buyPriceInr)}</Text>
+          </View>
+          <View style={styles.rateDivider} />
+          <View style={styles.rateCol}>
+            <Text style={styles.rateLabel}>Sell rate</Text>
+            <Text style={styles.rateValue}>{formatInr(rates.sellPriceInr)}</Text>
+          </View>
+          <View style={styles.rateDivider} />
+          <View style={styles.rateCol}>
+            <Text style={styles.rateLabel}>USD rate</Text>
+            <Text style={styles.rateValue}>₹{rates.inrPerUsd}</Text>
+          </View>
         </Card>
-      ) : (
-        <View style={styles.list}>
-          {transactions.map((tx) => (
-            <TransactionRow key={tx.id} tx={tx} />
-          ))}
+
+        {!verified ? (
+          <Pressable
+            onPress={() => router.navigate('/kyc')}
+            accessibilityRole="button"
+            accessibilityLabel="Complete identity verification"
+            style={({ pressed }) => [styles.kycCard, pressed && styles.pressed]}
+          >
+            <IconChip name="shield-checkmark-outline" tone="amber" size={44} />
+            <View style={styles.kycText}>
+              <Text style={styles.kycTitle}>
+                {kycStatus === 'PENDING' ? 'Verification in review' : 'Complete your verification'}
+              </Text>
+              <Text style={styles.kycBody}>
+                {kycStatus === 'PENDING'
+                  ? 'We are reviewing your documents. This usually takes 1–24 hours.'
+                  : 'Verify your identity to unlock bank payouts and full limits.'}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.warning} />
+          </Pressable>
+        ) : null}
+
+        <View style={styles.ecosystem}>
+          <View style={styles.ecosystemIcon}>
+            <Ionicons name="git-network-outline" size={22} color={colors.white} />
+          </View>
+          <View style={styles.ecosystemText}>
+            <Text style={styles.ecosystemTitle}>Connected ecosystem</Text>
+            <Text style={styles.ecosystemBody}>
+              Send SIcoinX to connected platforms such as YouPeak and YouPeak Shop from the Send screen.
+            </Text>
+          </View>
         </View>
-      )}
-    </Screen>
+
+        <SectionHeader title="Recent transactions" actionLabel="View all" onAction={() => router.navigate('/history')} />
+
+        {transactions.length === 0 ? (
+          <Card style={styles.emptyCard}>
+            <IconChip name="receipt-outline" tone="slate" size={48} />
+            <Text style={styles.emptyTitle}>No transactions yet</Text>
+            <Text style={styles.empty}>Your purchases and transfers will appear here.</Text>
+            <Button title="Buy your first coins" icon="add" small onPress={() => router.push('/buy')} />
+          </Card>
+        ) : (
+          <View style={styles.list}>
+            {transactions.map((tx) => (
+              <TransactionRow key={tx.id} tx={tx} />
+            ))}
+          </View>
+        )}
+
+        <Sheet visible={receiving} title="Receive SIcoinX" onClose={() => setReceiving(false)}>
+          <Text style={styles.receiveHelp}>
+            Share your wallet ID with another SIcoinX user or a connected app so they can send coins to you.
+          </Text>
+          <View style={styles.receiveBox}>
+            <Text style={styles.receiveLabel}>Your wallet ID</Text>
+            <Text style={styles.receiveAddress} selectable testID="receive-address">
+              {wallet.address}
+            </Text>
+          </View>
+          {shareError ? <Banner tone="info" message={shareError} /> : null}
+          <Button title="Share wallet ID" icon="share-social-outline" onPress={() => void shareAddress()} />
+          <Button title="Close" variant="ghost" onPress={() => setReceiving(false)} />
+        </Sheet>
+      </Screen>
+    );
+  }
+
+  return (
+    <View style={styles.fill}>
+      <HomeHeader unread={data?.unread ?? 0} />
+      {body}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  walletCard: {
-    backgroundColor: colors.primary,
+  fill: { flex: 1, backgroundColor: colors.canvas },
+  hero: {
+    backgroundColor: colors.navy,
     borderRadius: radius.xl,
-    padding: 20,
+    padding: 22,
     gap: 10,
-    shadowColor: colors.primary,
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 6,
+    overflow: 'hidden',
+    boxShadow: '0px 16px 34px rgba(10, 42, 122, 0.35)',
   },
-  walletTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  walletTitle: { color: 'rgba(255,255,255,0.75)', fontSize: 11, fontWeight: '800', letterSpacing: 0.6 },
-  kycBadge: { backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 999, paddingHorizontal: 9, paddingVertical: 3 },
-  kycBadgeText: { color: colors.white, fontSize: 10, fontWeight: '800' },
-  address: { color: colors.white, fontSize: 12, fontWeight: '700', fontFamily: 'monospace' },
-  balanceRow: { flexDirection: 'row', alignItems: 'baseline', gap: 6, marginTop: 6 },
-  balance: { color: colors.white, fontSize: 34, fontWeight: '900', flexShrink: 1 },
-  ticker: { color: 'rgba(255,255,255,0.75)', fontSize: 16, fontWeight: '800' },
-  valuation: { color: 'rgba(255,255,255,0.8)', fontSize: 12, fontWeight: '600' },
-  rates: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, gap: 0 },
-  rateCol: { flex: 1, alignItems: 'center', gap: 2 },
-  rateLabel: { fontSize: 10, fontWeight: '800', color: colors.muted, letterSpacing: 0.5 },
-  rateValue: { fontSize: 14, fontWeight: '800', color: colors.text },
-  rateDivider: { width: 1, height: 28, backgroundColor: colors.border },
-  actions: { flexDirection: 'row', gap: 10 },
-  action: {
-    flex: 1,
+  heroTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  heroLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  heroLabel: { color: 'rgba(255,255,255,0.8)', fontSize: 13, fontWeight: '700' },
+  kycBadge: {
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingVertical: 14,
-    backgroundColor: colors.surface,
+    gap: 4,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderRadius: radius.pill,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  kycBadgeOk: { backgroundColor: 'rgba(18, 146, 79, 0.85)' },
+  kycBadgeText: { color: colors.white, fontSize: 11, fontWeight: '800' },
+  balanceRow: { flexDirection: 'row', alignItems: 'baseline', gap: 8, marginTop: 6 },
+  balance: { color: colors.white, fontSize: 44, fontWeight: '900', letterSpacing: -1.2, flexShrink: 1 },
+  ticker: { color: 'rgba(255,255,255,0.8)', fontSize: 18, fontWeight: '800' },
+  valuation: { color: 'rgba(255,255,255,0.82)', fontSize: 13, fontWeight: '600' },
+  addressPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    alignSelf: 'flex-start',
+    marginTop: 8,
+    maxWidth: '100%',
+    backgroundColor: 'rgba(255,255,255,0.14)',
+    borderRadius: radius.pill,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+  },
+  address: { color: colors.white, fontSize: 12, fontWeight: '700', fontFamily: 'monospace', flexShrink: 1 },
+  actions: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 4 },
+  action: { alignItems: 'center', gap: 8, minWidth: 64 },
+  pressed: { opacity: 0.8 },
+  actionLabel: { fontSize: 12, fontWeight: '700', color: colors.textSoft },
+  rates: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, gap: 0 },
+  rateCol: { flex: 1, alignItems: 'center', gap: 3 },
+  rateLabel: { fontSize: 11, fontWeight: '700', color: colors.muted },
+  rateValue: { fontSize: 15, fontWeight: '800', color: colors.text },
+  rateDivider: { width: 1, height: 30, backgroundColor: colors.border },
+  kycCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 14,
+    backgroundColor: colors.warningBg,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.warningBorder,
   },
-  pressed: { opacity: 0.85 },
-  actionLabel: { fontSize: 11, fontWeight: '700', color: colors.text },
+  kycText: { flex: 1, gap: 2 },
+  kycTitle: { fontSize: 14, fontWeight: '800', color: colors.warning },
+  kycBody: { fontSize: 12, color: colors.textSoft, lineHeight: 17 },
   ecosystem: {
     flexDirection: 'row',
     gap: 12,
@@ -183,23 +309,27 @@ const styles = StyleSheet.create({
     backgroundColor: colors.paleBlue,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: '#CFE0FF',
     alignItems: 'center',
   },
   ecosystemIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.md,
+    width: 44,
+    height: 44,
+    borderRadius: 15,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
+    ...shadow.glow,
   },
   ecosystemText: { flex: 1, gap: 2 },
-  ecosystemTitle: { fontSize: 13, fontWeight: '800', color: colors.text },
-  ecosystemBody: { fontSize: 11, color: colors.muted, lineHeight: 16 },
-  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  sectionTitle: { fontSize: 14, fontWeight: '800', color: colors.text },
-  viewAll: { fontSize: 12, fontWeight: '700', color: colors.primary },
-  list: { gap: 8 },
-  empty: { fontSize: 12, color: colors.muted, textAlign: 'center' },
+  ecosystemTitle: { fontSize: 14, fontWeight: '800', color: colors.text },
+  ecosystemBody: { fontSize: 12, color: colors.textSoft, lineHeight: 17 },
+  list: { gap: 10 },
+  emptyCard: { alignItems: 'center', paddingVertical: 24, gap: 8 },
+  emptyTitle: { fontSize: 15, fontWeight: '800', color: colors.text },
+  empty: { fontSize: 13, color: colors.muted, textAlign: 'center', marginBottom: 6 },
+  receiveHelp: { fontSize: 14, color: colors.muted, lineHeight: 21 },
+  receiveBox: { backgroundColor: colors.paleBlue, borderRadius: radius.md, padding: 16, gap: 6 },
+  receiveLabel: { fontSize: 11, fontWeight: '800', color: colors.muted, letterSpacing: 0.6, textTransform: 'uppercase' },
+  receiveAddress: { fontSize: 16, fontWeight: '800', color: colors.text, fontFamily: 'monospace' },
 });

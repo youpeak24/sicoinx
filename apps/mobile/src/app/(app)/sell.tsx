@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import { StyleSheet, Text, View, type TextInputInstance } from 'react-native';
@@ -53,9 +54,12 @@ export default function SellScreen() {
     return (
       <Screen insetBottom>
         <Card style={styles.done}>
+          <View style={styles.successBadge}>
+            <Ionicons name="checkmark" size={38} color={colors.white} />
+          </View>
           <Text style={styles.doneTitle}>Payout request submitted</Text>
           <Text style={styles.doneBody}>
-            Order {orderNumber} is queued for review and bank settlement. You can follow it under History.
+            Order {orderNumber} is queued for review and bank settlement. You can follow it under Activity.
           </Text>
           <Button title="Back to wallet" onPress={() => router.back()} style={styles.fullWidth} />
         </Card>
@@ -94,10 +98,13 @@ export default function SellScreen() {
     <Screen insetBottom>
       <View style={styles.rateStrip}>
         <View>
-          <Text style={styles.rateLabel}>SELLING RATE</Text>
+          <Text style={styles.rateLabel}>Selling rate</Text>
           <Text style={styles.rateValue}>1 SI = {formatInr(rates.sellPriceInr)}</Text>
         </View>
-        <Text style={styles.settlement}>Bank settlement</Text>
+        <View style={styles.settlement}>
+          <Ionicons name="business" size={13} color={colors.primary} />
+          <Text style={styles.settlementText}>Bank settlement</Text>
+        </View>
       </View>
 
       {!rates.enableSelling ? (
@@ -106,7 +113,7 @@ export default function SellScreen() {
       {overview.kycStatus !== 'APPROVED' ? (
         <Banner
           tone="info"
-          message="Payouts may require completed KYC verification. You can submit it from the KYC tab."
+          message="Payouts may require completed KYC verification. You can submit it from the Verify tab."
         />
       ) : null}
       {frozen ? <Banner tone="error" message="Your wallet is frozen. Contact support to sell coins." /> : null}
@@ -134,7 +141,8 @@ export default function SellScreen() {
         </View>
         <Button
           title="Sell my full balance"
-          variant="ghost"
+          variant="secondary"
+          small
           onPress={() => setAmount(balance.replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, ''))}
           disabled={submitting}
         />
@@ -144,6 +152,7 @@ export default function SellScreen() {
         <SectionLabel>Receiving bank account</SectionLabel>
         <TextField
           label="Account holder name"
+          icon="person-outline"
           value={accountName}
           onChangeText={setAccountName}
           autoCapitalize="words"
@@ -153,6 +162,7 @@ export default function SellScreen() {
         />
         <TextField
           label="Bank name"
+          icon="business-outline"
           value={bankName}
           onChangeText={setBankName}
           placeholder="e.g. HDFC Bank"
@@ -164,6 +174,7 @@ export default function SellScreen() {
         />
         <TextField
           label="Account number"
+          icon="keypad-outline"
           value={accountNumber}
           onChangeText={(t) => setAccountNumber(t.replace(/\D/g, ''))}
           keyboardType="number-pad"
@@ -175,6 +186,7 @@ export default function SellScreen() {
         />
         <TextField
           label="IFSC code"
+          icon="barcode-outline"
           value={ifsc}
           onChangeText={(t) => setIfsc(t.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 11))}
           placeholder="HDFC0001234"
@@ -188,6 +200,7 @@ export default function SellScreen() {
 
       <Button
         title={`Request payout of ${formatInr(payout)}`}
+        icon="arrow-down-circle-outline"
         onPress={submit}
         loading={submitting}
         disabled={!rates.enableSelling || frozen}
@@ -201,20 +214,37 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: colors.surface,
+    padding: 18,
+    backgroundColor: colors.paleBlue,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: '#CFE0FF',
   },
-  rateLabel: { fontSize: 10, fontWeight: '800', color: colors.muted, letterSpacing: 0.5 },
-  rateValue: { fontSize: 16, fontWeight: '900', color: colors.text },
-  settlement: { fontSize: 11, fontWeight: '800', color: colors.primary },
-  payoutRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  payoutLabel: { fontSize: 12, color: colors.muted },
-  payoutValue: { fontSize: 18, fontWeight: '900', color: colors.success },
+  rateLabel: { fontSize: 12, fontWeight: '700', color: colors.muted },
+  rateValue: { fontSize: 20, fontWeight: '900', color: colors.text, letterSpacing: -0.4, marginTop: 2 },
+  settlement: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: colors.surface,
+    borderRadius: radius.pill,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  settlementText: { fontSize: 11, fontWeight: '800', color: colors.primary },
+  payoutRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  payoutLabel: { fontSize: 13, color: colors.muted, fontWeight: '600' },
+  payoutValue: { fontSize: 22, fontWeight: '900', color: colors.success, letterSpacing: -0.4 },
   done: { alignItems: 'center', paddingVertical: 28 },
-  doneTitle: { fontSize: 18, fontWeight: '900', color: colors.text, textAlign: 'center' },
-  doneBody: { fontSize: 13, color: colors.muted, textAlign: 'center', lineHeight: 19 },
+  successBadge: { width: 72, height: 72, borderRadius: 36, backgroundColor: colors.success, alignItems: 'center', justifyContent: 'center' },
+  doneTitle: { fontSize: 20, fontWeight: '900', color: colors.text, textAlign: 'center', letterSpacing: -0.3 },
+  doneBody: { fontSize: 14, color: colors.muted, textAlign: 'center', lineHeight: 21 },
   fullWidth: { alignSelf: 'stretch' },
 });

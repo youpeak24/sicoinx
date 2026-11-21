@@ -14,6 +14,14 @@ export function LoadingView({ label = 'Loading…' }: { label?: string }) {
   );
 }
 
+function IconBubble({ name, tone }: { name: ComponentProps<typeof Ionicons>['name']; tone: 'neutral' | 'danger' }) {
+  return (
+    <View style={[styles.bubble, tone === 'danger' && styles.bubbleDanger]}>
+      <Ionicons name={name} size={30} color={tone === 'danger' ? colors.danger : colors.primary} />
+    </View>
+  );
+}
+
 interface ErrorViewProps {
   message: string;
   onRetry?: () => void;
@@ -23,10 +31,10 @@ interface ErrorViewProps {
 export function ErrorView({ message, onRetry, title = 'Something went wrong' }: ErrorViewProps) {
   return (
     <View style={styles.center}>
-      <Ionicons name="cloud-offline-outline" size={44} color={colors.muted} />
+      <IconBubble name="cloud-offline-outline" tone="danger" />
       <Text style={styles.title}>{title}</Text>
       <Text style={[styles.muted, styles.centerText]}>{message}</Text>
-      {onRetry ? <Button title="Try again" variant="secondary" icon="refresh" onPress={onRetry} /> : null}
+      {onRetry ? <Button title="Try again" variant="secondary" icon="refresh" onPress={onRetry} small /> : null}
     </View>
   );
 }
@@ -40,7 +48,7 @@ interface EmptyViewProps {
 export function EmptyView({ icon, title, message }: EmptyViewProps) {
   return (
     <View style={styles.center}>
-      <Ionicons name={icon} size={44} color={colors.muted} />
+      <IconBubble name={icon} tone="neutral" />
       <Text style={styles.title}>{title}</Text>
       {message ? <Text style={[styles.muted, styles.centerText]}>{message}</Text> : null}
     </View>
@@ -48,8 +56,18 @@ export function EmptyView({ icon, title, message }: EmptyViewProps) {
 }
 
 const styles = StyleSheet.create({
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10, padding: 32 },
-  title: { fontSize: 15, fontWeight: '800', color: colors.text, textAlign: 'center' },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 32 },
+  bubble: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    backgroundColor: colors.paleBlue,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  bubbleDanger: { backgroundColor: colors.dangerBg },
+  title: { fontSize: 17, fontWeight: '800', color: colors.text, textAlign: 'center', letterSpacing: -0.2 },
   muted: { fontSize: 13, color: colors.muted },
-  centerText: { textAlign: 'center', lineHeight: 19 },
+  centerText: { textAlign: 'center', lineHeight: 20 },
 });

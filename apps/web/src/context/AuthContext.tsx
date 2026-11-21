@@ -38,6 +38,8 @@ const FIREBASE_ERRORS: Record<string, string> = {
   'auth/email-already-in-use': 'An account with this email address already exists.',
   'auth/weak-password': 'Password is too weak.',
   'auth/too-many-requests': 'Too many attempts. Please wait a moment and try again.',
+  'auth/operation-not-allowed': 'Email/password sign-in is not enabled in the Firebase console (Authentication → Sign-in method).',
+  'auth/unauthorized-continue-uri': 'This domain is not authorized in Firebase (Authentication → Settings → Authorized domains).',
   'auth/network-request-failed': 'Network error. Check your connection and try again.',
 };
 

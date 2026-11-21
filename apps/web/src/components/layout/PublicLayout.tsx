@@ -3,7 +3,6 @@ import { Outlet } from 'react-router-dom';
 import { AnnouncementBanner } from '../common/AnnouncementBanner';
 import { Navbar } from '../common/Navbar';
 import { Footer } from '../common/Footer';
-import { DevMailboxModal } from '../common/DevMailboxModal';
 import { PageTransition } from '../common/animations/PageTransition';
 import { BottomNav } from './BottomNav';
 import { ChatAssistant } from '../chatbot/ChatAssistant';
@@ -20,7 +19,6 @@ export const PublicLayout: React.FC = () => {
       </main>
       <Footer />
       <BottomNav />
-      <DevMailboxModal aboveBottomNav />
       <ChatAssistant />
     </div>
   );

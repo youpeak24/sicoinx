@@ -1,3 +1,4 @@
+import { useFocusEffect } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 
@@ -14,7 +15,6 @@ import { TransactionRow } from '@/components/TransactionRow';
 import { formatDateTime, shortHash, statusLabel, txTypeLabel } from '@/lib/format';
 import { formatCoin } from '@/lib/money';
 import { colors } from '@/theme';
-import { useFocusEffect } from 'expo-router';
 
 const PAGE_SIZE = 20;
 
@@ -140,6 +140,7 @@ export default function HistoryScreen() {
         onEndReachedThreshold={0.4}
         refreshing={refreshing}
         onRefresh={() => void loadFirstPage('refresh')}
+        showsVerticalScrollIndicator={false}
       />
     );
   }
@@ -175,9 +176,9 @@ export default function HistoryScreen() {
 
 const styles = StyleSheet.create({
   fill: { flex: 1, backgroundColor: colors.canvas },
-  bannerWrap: { paddingHorizontal: 16, paddingBottom: 8 },
-  listContent: { paddingHorizontal: 16, paddingBottom: 24 },
+  bannerWrap: { paddingHorizontal: 20, paddingBottom: 8 },
+  listContent: { paddingHorizontal: 20, paddingBottom: 24 },
   emptyContent: { flexGrow: 1 },
-  separator: { height: 8 },
+  separator: { height: 10 },
   footer: { paddingVertical: 16 },
 });

@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
@@ -5,10 +6,11 @@ import { StyleSheet, Text, View } from 'react-native';
 import { messageOf } from '@/api/client';
 import { createBuyOrder, getRates, verifyPayment } from '@/api/services';
 import type { BuyOrderIntent, PaymentMethod, PurchaseReceipt } from '@/api/types';
+import { Backdrop } from '@/components/Backdrop';
 import { Banner } from '@/components/Banner';
 import { Button } from '@/components/Button';
 import { Card, KeyValueRow, SectionLabel } from '@/components/Card';
-import { ChoiceList, type Option } from '@/components/Choices';
+import { ChoiceList, QuickAmounts, type Option } from '@/components/Choices';
 import { Screen } from '@/components/Screen';
 import { Sheet } from '@/components/Sheet';
 import { ErrorView, LoadingView } from '@/components/State';
@@ -17,7 +19,6 @@ import { track } from '@/lib/analytics';
 import { formatCoin, formatInr, multiplyToInr, sanitizeDecimalInput } from '@/lib/money';
 import { useResource } from '@/lib/useResource';
 import { validateCoinAmount } from '@/lib/validation';
-import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '@/theme';
 
 const METHODS: Option<PaymentMethod>[] = [
@@ -25,6 +26,8 @@ const METHODS: Option<PaymentMethod>[] = [
   { value: 'RAZORPAY_CARD', label: 'Debit / Credit card', icon: 'card-outline' },
   { value: 'RAZORPAY_NETBANKING', label: 'Net banking', icon: 'business-outline' },
 ];
+
+const QUICK = ['100', '500', '1000', '5000'];
 
 export default function BuyScreen() {
   const router = useRouter();
@@ -47,7 +50,9 @@ export default function BuyScreen() {
     return (
       <Screen insetBottom>
         <Card style={styles.receipt}>
-          <Ionicons name="checkmark-circle" size={56} color={colors.success} />
+          <View style={styles.successBadge}>
+            <Ionicons name="checkmark" size={38} color={colors.white} />
+          </View>
           <Text style={styles.receiptTitle}>Coins credited to your wallet</Text>
           <Text style={styles.receiptSub}>Purchase receipt</Text>
           <View style={styles.receiptRows}>
@@ -133,11 +138,15 @@ export default function BuyScreen() {
   return (
     <Screen insetBottom>
       <View style={styles.rateStrip}>
+        <Backdrop />
         <View>
-          <Text style={styles.rateLabel}>BUYING RATE</Text>
+          <Text style={styles.rateLabel}>Buying rate</Text>
           <Text style={styles.rateValue}>1 SI = {formatInr(r.buyPriceInr)}</Text>
         </View>
-        <Text style={styles.instant}>Instant credit</Text>
+        <View style={styles.instant}>
+          <Ionicons name="flash" size={13} color={colors.white} />
+          <Text style={styles.instantText}>Instant credit</Text>
+        </View>
       </View>
 
       {!r.enableBuying ? (
@@ -160,6 +169,13 @@ export default function BuyScreen() {
           error={amount.length > 0 ? amountProblem : null}
           editable={!busy}
         />
+        <QuickAmounts
+          amounts={QUICK}
+          onPick={(a) => {
+            setAmount(a);
+            setError(null);
+          }}
+        />
         <View style={styles.totalRow}>
           <Text style={styles.totalLabel}>Total to pay</Text>
           <Text style={styles.totalValue}>{formatInr(total)}</Text>
@@ -173,6 +189,7 @@ export default function BuyScreen() {
 
       <Button
         title={`Pay ${formatInr(total)}`}
+        icon="lock-closed"
         onPress={startPayment}
         loading={creating}
         disabled={!r.enableBuying || amountProblem !== null}
@@ -205,22 +222,38 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: colors.paleBlue,
+    padding: 18,
+    backgroundColor: colors.navy,
     borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
+    overflow: 'hidden',
   },
-  rateLabel: { fontSize: 10, fontWeight: '800', color: colors.muted, letterSpacing: 0.5 },
-  rateValue: { fontSize: 16, fontWeight: '900', color: colors.text },
-  instant: { fontSize: 11, fontWeight: '800', color: colors.success },
-  totalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  totalLabel: { fontSize: 12, color: colors.muted },
-  totalValue: { fontSize: 18, fontWeight: '900', color: colors.primary },
-  methods: { gap: 8 },
+  rateLabel: { fontSize: 12, fontWeight: '700', color: 'rgba(255,255,255,0.75)' },
+  rateValue: { fontSize: 20, fontWeight: '900', color: colors.white, letterSpacing: -0.4, marginTop: 2 },
+  instant: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(18, 146, 79, 0.85)',
+    borderRadius: radius.pill,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  instantText: { fontSize: 11, fontWeight: '800', color: colors.white },
+  totalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  totalLabel: { fontSize: 13, color: colors.muted, fontWeight: '600' },
+  totalValue: { fontSize: 22, fontWeight: '900', color: colors.primary, letterSpacing: -0.4 },
+  methods: { gap: 10 },
   receipt: { alignItems: 'center', paddingVertical: 28 },
-  receiptTitle: { fontSize: 18, fontWeight: '900', color: colors.text, textAlign: 'center' },
-  receiptSub: { fontSize: 12, color: colors.muted, marginTop: -8 },
+  successBadge: { width: 72, height: 72, borderRadius: 36, backgroundColor: colors.success, alignItems: 'center', justifyContent: 'center' },
+  receiptTitle: { fontSize: 20, fontWeight: '900', color: colors.text, textAlign: 'center', letterSpacing: -0.3 },
+  receiptSub: { fontSize: 13, color: colors.muted, marginTop: -8 },
   receiptRows: { alignSelf: 'stretch' },
   fullWidth: { alignSelf: 'stretch' },
 });

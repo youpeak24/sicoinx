@@ -19,6 +19,9 @@ interface ScreenProps {
   insetBottom?: boolean;
   /** Add the top safe-area inset (screens without a header). */
   insetTop?: boolean;
+  /** Drop the default horizontal padding (screens that draw full-bleed sections). */
+  flush?: boolean;
+  background?: string;
   contentStyle?: StyleProp<ViewStyle>;
 }
 
@@ -29,23 +32,27 @@ export function Screen({
   onRefresh,
   insetBottom = false,
   insetTop = false,
+  flush = false,
+  background = colors.canvas,
   contentStyle,
 }: PropsWithChildren<ScreenProps>) {
   const insets = useSafeAreaInsets();
 
   return (
     <KeyboardAvoidingView
-      style={styles.fill}
+      style={[styles.fill, { backgroundColor: background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={0}
     >
       <ScrollView
-        style={styles.fill}
+        style={[styles.fill, { backgroundColor: background }]}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.content,
-          { paddingTop: 20 + (insetTop ? insets.top : 0), paddingBottom: 24 + (insetBottom ? insets.bottom : 0) },
+          flush && styles.flush,
+          { paddingTop: 16 + (insetTop ? insets.top : 0), paddingBottom: 28 + (insetBottom ? insets.bottom : 0) },
           contentStyle,
         ]}
         refreshControl={
@@ -61,6 +68,7 @@ export function Screen({
 }
 
 const styles = StyleSheet.create({
-  fill: { flex: 1, backgroundColor: colors.canvas },
+  fill: { flex: 1 },
   content: { paddingHorizontal: 20, gap: 16 },
+  flush: { paddingHorizontal: 0 },
 });

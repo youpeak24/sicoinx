@@ -34,7 +34,8 @@ function SplashGate() {
 /** Logs a screen_view per route. Uses the route template, so ids such as ticket/[id] never reach analytics. */
 function ScreenTracker() {
   const segments = useSegments();
-  const screen = segments.filter((s) => !/^(.*)$/.test(s)).join('/') || 'wallet';
+  // Drop route-group segments such as "(app)" and "(tabs)".
+  const screen = (segments as string[]).filter((s) => !/^\(.*\)$/.test(s)).join('/') || 'wallet';
   useEffect(() => {
     trackScreen(screen);
   }, [screen]);
@@ -44,6 +45,8 @@ function ScreenTracker() {
 function RootNavigator() {
   const { status, retry, signOut } = useSession();
   const signedIn = status === 'signedIn';
+  const unverified = status === 'unverified';
+  const signedOut = !signedIn && !unverified;
 
   return (
     <>
@@ -51,9 +54,13 @@ function RootNavigator() {
         <Stack.Protected guard={signedIn}>
           <Stack.Screen name="(app)" />
         </Stack.Protected>
-        <Stack.Protected guard={!signedIn}>
+        <Stack.Protected guard={unverified}>
+          <Stack.Screen name="verify-email" />
+        </Stack.Protected>
+        <Stack.Protected guard={signedOut}>
           <Stack.Screen name="sign-in" />
           <Stack.Screen name="register" />
+          <Stack.Screen name="forgot-password" />
         </Stack.Protected>
       </Stack>
 
@@ -65,7 +72,7 @@ function RootNavigator() {
             onRetry={retry}
           />
           <View style={styles.overlayAction}>
-            <Button title="Sign out" variant="ghost" onPress={() => void signOut()} />
+            <Button title="Sign out" variant="outline" onPress={() => void signOut()} />
           </View>
         </View>
       ) : null}

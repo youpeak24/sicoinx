@@ -113,7 +113,9 @@ export default function KycScreen() {
   return (
     <Screen refreshing={refreshing} onRefresh={refresh}>
       <View style={[styles.statusCard, { backgroundColor: summary.bg, borderColor: summary.border }]}>
-        <Ionicons name={summary.icon} size={30} color={summary.fg} />
+        <View style={[styles.statusIcon, { backgroundColor: summary.fg }]}>
+          <Ionicons name={summary.icon} size={26} color={colors.white} />
+        </View>
         <View style={styles.statusText}>
           <Text style={[styles.statusTitle, { color: summary.fg }]}>{summary.title}</Text>
           <Text style={styles.statusBody}>{summary.body}</Text>
@@ -147,6 +149,7 @@ export default function KycScreen() {
             <SectionLabel>Government ID details</SectionLabel>
             <TextField
               label="Full name as on ID"
+              icon="person-outline"
               value={fullName}
               onChangeText={setFullName}
               autoCapitalize="words"
@@ -160,6 +163,7 @@ export default function KycScreen() {
             </View>
             <TextField
               label="Document ID number"
+              icon="id-card-outline"
               value={idNumber}
               onChangeText={setIdNumber}
               autoCapitalize="characters"
@@ -180,19 +184,22 @@ export default function KycScreen() {
                   <Image source={{ uri: document.uri }} style={styles.preview} resizeMode="cover" />
                 ) : (
                   <View style={styles.pickerEmpty}>
-                    <Ionicons name="cloud-upload-outline" size={28} color={colors.primary} />
+                    <View style={styles.pickerIcon}>
+                      <Ionicons name="cloud-upload-outline" size={26} color={colors.primary} />
+                    </View>
                     <Text style={styles.pickerText}>Choose a clear photo of the front of your ID</Text>
                   </View>
                 )}
               </Pressable>
               {document ? (
-                <Button title="Choose a different photo" variant="ghost" onPress={pickDocument} disabled={submitting} />
+                <Button title="Choose a different photo" variant="ghost" small onPress={pickDocument} disabled={submitting} />
               ) : null}
             </View>
           </Card>
 
           <Button
             title={status === 'REJECTED' ? 'Resubmit verification' : 'Submit for verification'}
+            icon="shield-checkmark-outline"
             onPress={submit}
             loading={submitting}
           />
@@ -206,7 +213,7 @@ function describeStatus(status: KycRecord['status']) {
   switch (status) {
     case 'APPROVED':
       return {
-        icon: 'checkmark-circle' as const,
+        icon: 'checkmark' as const,
         fg: colors.success,
         bg: colors.successBg,
         border: colors.successBorder,
@@ -224,7 +231,7 @@ function describeStatus(status: KycRecord['status']) {
       };
     case 'REJECTED':
       return {
-        icon: 'close-circle' as const,
+        icon: 'close' as const,
         fg: colors.danger,
         bg: colors.dangerBg,
         border: colors.dangerBorder,
@@ -235,8 +242,8 @@ function describeStatus(status: KycRecord['status']) {
       return {
         icon: 'shield-outline' as const,
         fg: colors.primary,
-        bg: colors.surface,
-        border: colors.border,
+        bg: colors.paleBlue,
+        border: '#CFE0FF',
         title: 'Verification required',
         body: 'Complete identity verification to unlock bank cashouts.',
       };
@@ -252,20 +259,22 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     borderWidth: 1,
   },
-  statusText: { flex: 1, gap: 2 },
-  statusTitle: { fontSize: 14, fontWeight: '800' },
-  statusBody: { fontSize: 12, color: colors.muted, lineHeight: 17 },
+  statusIcon: { width: 48, height: 48, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  statusText: { flex: 1, gap: 3 },
+  statusTitle: { fontSize: 16, fontWeight: '800', letterSpacing: -0.2 },
+  statusBody: { fontSize: 13, color: colors.textSoft, lineHeight: 18 },
   group: { gap: 8 },
-  groupLabel: { fontSize: 11, fontWeight: '700', color: colors.muted, letterSpacing: 0.6, textTransform: 'uppercase' },
+  groupLabel: { fontSize: 12, fontWeight: '700', color: colors.textSoft, letterSpacing: 0.2 },
   picker: {
     borderRadius: radius.md,
     borderWidth: 1.5,
     borderStyle: 'dashed',
-    borderColor: colors.border,
-    backgroundColor: colors.canvas,
+    borderColor: '#BCD0F5',
+    backgroundColor: colors.tint,
     overflow: 'hidden',
   },
-  pickerEmpty: { alignItems: 'center', gap: 8, paddingVertical: 28, paddingHorizontal: 16 },
-  pickerText: { fontSize: 12, color: colors.muted, textAlign: 'center' },
-  preview: { width: '100%', height: 180 },
+  pickerEmpty: { alignItems: 'center', gap: 10, paddingVertical: 28, paddingHorizontal: 16 },
+  pickerIcon: { width: 52, height: 52, borderRadius: 26, backgroundColor: colors.paleBlue, alignItems: 'center', justifyContent: 'center' },
+  pickerText: { fontSize: 13, color: colors.muted, textAlign: 'center' },
+  preview: { width: '100%', height: 190 },
 });

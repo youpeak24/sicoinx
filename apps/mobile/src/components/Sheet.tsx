@@ -49,7 +49,7 @@ export function Sheet({ visible, title, onClose, locked = false, children }: Pro
 
 const styles = StyleSheet.create({
   fill: { flex: 1, justifyContent: 'flex-end' },
-  backdrop: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(16,33,58,0.45)' },
+  backdrop: { ...StyleSheet.absoluteFill, backgroundColor: colors.overlay },
   sheet: {
     maxHeight: '88%',
     backgroundColor: colors.surface,
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 10,
   },
-  handle: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: colors.border, marginBottom: 12 },
-  title: { fontSize: 17, fontWeight: '800', color: colors.text, marginBottom: 14 },
+  handle: { alignSelf: 'center', width: 44, height: 5, borderRadius: 3, backgroundColor: colors.border, marginBottom: 14 },
+  title: { fontSize: 18, fontWeight: '800', color: colors.text, marginBottom: 14, letterSpacing: -0.2 },
   body: { gap: 14, paddingBottom: 4 },
 });

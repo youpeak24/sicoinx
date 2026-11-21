@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../lib/prisma';
-import { verifyJwtToken } from '../lib/security';
+import { verifyJwtToken, hashPassword, generateRandomToken } from '../lib/security';
+import { looksLikeFirebaseToken, verifyFirebaseIdToken } from '../lib/firebaseAuth';
 import { Role, ROLE_PERMISSIONS } from '@sicoin/shared';
 
 export interface AuthenticatedUser {
@@ -21,6 +22,67 @@ declare global {
   }
 }
 
+
+const denied = (res: Response, status: number, code: string, message: string) =>
+  res.status(status).json({ success: false, error: { code, message } });
+
+/**
+ * Resolves the API user for a verified Firebase ID token (the web app signs in with Firebase).
+ * Accounts are linked by Firebase UID. An existing API account (matched by email) is linked only when Firebase
+ * reports that email as verified, so nobody can claim someone else's account by registering their address.
+ */
+async function authenticateFirebase(token: string, req: Request, res: Response, next: NextFunction) {
+  const claims = await verifyFirebaseIdToken(token);
+  if (!claims) return denied(res, 401, 'INVALID_TOKEN', 'Your sign-in could not be verified. Please log in again.');
+
+  let user = await prisma.user.findUnique({ where: { firebaseUid: claims.uid } });
+
+  if (!user) {
+    if (!claims.email) return denied(res, 401, 'INVALID_TOKEN', 'Your account has no email address.');
+
+    const byEmail = await prisma.user.findUnique({ where: { email: claims.email } });
+    if (byEmail) {
+      if (byEmail.firebaseUid && byEmail.firebaseUid !== claims.uid) {
+        return denied(res, 403, 'ACCOUNT_CONFLICT', 'This email belongs to a different account.');
+      }
+      if (!claims.emailVerified) {
+        return denied(res, 403, 'EMAIL_NOT_VERIFIED', 'Please verify your email address to access this account.');
+      }
+      user = await prisma.user.update({
+        where: { id: byEmail.id },
+        data: { firebaseUid: claims.uid, isEmailVerified: true },
+      });
+    } else {
+      user = await prisma.user.create({
+        data: {
+          email: claims.email,
+          name: claims.name || claims.email.split('@')[0],
+          firebaseUid: claims.uid,
+          passwordHash: await hashPassword(generateRandomToken(32)), // unusable: sign-in happens in Firebase
+          role: 'USER',
+          isEmailVerified: claims.emailVerified,
+        },
+      });
+    }
+  } else if (claims.emailVerified && !user.isEmailVerified) {
+    user = await prisma.user.update({ where: { id: user.id }, data: { isEmailVerified: true } });
+  }
+
+  if (user.isBanned) {
+    return denied(res, 403, 'ACCOUNT_SUSPENDED', 'This account has been suspended by system administration.');
+  }
+
+  req.user = {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role as Role,
+    isEmailVerified: user.isEmailVerified,
+    mfaEnabled: user.mfaEnabled,
+  };
+  return next();
+}
+
 export async function authenticateToken(req: Request, res: Response, next: NextFunction) {
   try {
     let token = req.cookies?.sicoin_session;
@@ -37,6 +99,11 @@ export async function authenticateToken(req: Request, res: Response, next: NextF
           message: 'Authentication session required',
         },
       });
+    }
+
+    // Firebase ID token (web app) vs. this API's own session token
+    if (looksLikeFirebaseToken(token)) {
+      return await authenticateFirebase(token, req, res, next);
     }
 
     // Check if session exists in DB and is not revoked

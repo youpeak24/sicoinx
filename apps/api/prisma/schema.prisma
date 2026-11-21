@@ -12,6 +12,7 @@ model User {
   email           String             @unique
   passwordHash    String
   name            String
+  firebaseUid     String?            @unique // Firebase Auth UID once the account is linked to a Firebase sign-in
   role            String             @default("USER") // SUPER_ADMIN, FINANCE_MANAGER, CONTENT_EDITOR, SUPPORT_AGENT, READONLY_ANALYST, USER
   isEmailVerified Boolean            @default(false)
   mfaSecret       String?

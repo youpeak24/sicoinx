@@ -17,7 +17,7 @@ import { track } from '@/lib/analytics';
 import { formatDateTime, statusLabel, ticketTone } from '@/lib/format';
 import { useResource } from '@/lib/useResource';
 import { validateTicket } from '@/lib/validation';
-import { colors, radius } from '@/theme';
+import { colors, radius, shadow } from '@/theme';
 
 const CATEGORIES: Option<string>[] = [
   { value: 'Wallet & Trading', label: 'Wallet & Trading' },
@@ -37,7 +37,7 @@ export default function SupportScreen() {
 
   const [composing, setComposing] = useState(false);
   const [subject, setSubject] = useState('');
-  const [category, setCategory] = useState(CATEGORIES[0].value);
+  const [category, setCategory] = useState(CATEGORIES[0]!.value);
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -85,6 +85,7 @@ export default function SupportScreen() {
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         refreshing={refreshing}
         onRefresh={refresh}
+        showsVerticalScrollIndicator={false}
         ListHeaderComponent={error ? <Banner tone="warning" message={`Couldn't refresh: ${error}`} /> : undefined}
         ListEmptyComponent={
           <EmptyView
@@ -128,7 +129,7 @@ export default function SupportScreen() {
         accessibilityLabel="New support ticket"
         style={({ pressed }) => [styles.fab, pressed && styles.pressed]}
       >
-        <Ionicons name="add" size={20} color={colors.white} />
+        <Ionicons name="add" size={22} color={colors.white} />
         <Text style={styles.fabText}>New ticket</Text>
       </Pressable>
 
@@ -157,7 +158,7 @@ export default function SupportScreen() {
           textAlignVertical="top"
           editable={!submitting}
         />
-        <Button title="Submit ticket" onPress={submit} loading={submitting} />
+        <Button title="Submit ticket" icon="send" onPress={submit} loading={submitting} />
       </Sheet>
     </View>
   );
@@ -165,40 +166,37 @@ export default function SupportScreen() {
 
 const styles = StyleSheet.create({
   fill: { flex: 1, backgroundColor: colors.canvas },
-  listContent: { padding: 16, paddingBottom: 96 },
+  listContent: { padding: 20, paddingTop: 12, paddingBottom: 110 },
   emptyContent: { flexGrow: 1 },
-  separator: { height: 10 },
+  separator: { height: 12 },
   ticket: {
-    gap: 6,
+    gap: 8,
     padding: 16,
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: '#EEF2FA',
+    ...shadow.soft,
   },
   pressed: { opacity: 0.85 },
   ticketTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  category: { flex: 1, fontSize: 10, fontWeight: '800', color: colors.primary, textTransform: 'uppercase' },
-  subject: { fontSize: 14, fontWeight: '700', color: colors.text },
-  meta: { fontSize: 11, color: colors.muted },
+  category: { flex: 1, fontSize: 11, fontWeight: '800', color: colors.primary, textTransform: 'uppercase', letterSpacing: 0.4 },
+  subject: { fontSize: 15, fontWeight: '800', color: colors.text, lineHeight: 21 },
+  meta: { fontSize: 12, color: colors.muted },
   fab: {
     position: 'absolute',
-    right: 16,
-    bottom: 16,
+    right: 20,
+    bottom: 20,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingHorizontal: 18,
-    height: 48,
-    borderRadius: 24,
+    paddingHorizontal: 20,
+    height: 52,
+    borderRadius: 26,
     backgroundColor: colors.primary,
-    shadowColor: colors.primary,
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 5,
+    ...shadow.glow,
   },
-  fabText: { color: colors.white, fontSize: 13, fontWeight: '800' },
+  fabText: { color: colors.white, fontSize: 14, fontWeight: '800' },
   categoryGroup: { gap: 8 },
-  groupLabel: { fontSize: 11, fontWeight: '700', color: colors.muted, letterSpacing: 0.6, textTransform: 'uppercase' },
+  groupLabel: { fontSize: 12, fontWeight: '700', color: colors.textSoft, letterSpacing: 0.2 },
 });

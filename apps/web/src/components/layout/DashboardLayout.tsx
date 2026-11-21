@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useWallet } from '../../context/WalletContext';
 import { SiLogo } from '../common/SiLogo';
-import { DevMailboxModal } from '../common/DevMailboxModal';
 import { PageTransition } from '../common/animations/PageTransition';
 import { BottomNav } from './BottomNav';
 import { ChatAssistant } from '../chatbot/ChatAssistant';
@@ -47,8 +46,7 @@ export const DashboardLayout: React.FC = () => {
   }
 
   if (!user) {
-    navigate('/login');
-    return null;
+    return <Navigate to="/login" replace />;
   }
 
   const menuItems = [
@@ -301,7 +299,6 @@ export const DashboardLayout: React.FC = () => {
       {/* Web Application Bottom Navigation Bar */}
       <BottomNav />
 
-      <DevMailboxModal />
       <ChatAssistant />
     </div>
   );

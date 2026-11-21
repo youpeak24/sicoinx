@@ -21,11 +21,28 @@ export const API_UNREACHABLE_MESSAGE =
 export const NOT_CONFIGURED_MESSAGE =
   'This build has no API server configured. Set EXPO_PUBLIC_API_URL and rebuild the app.';
 
-let authToken: string | null = null;
+/**
+ * Supplies the credential for each request. The app registers a provider that returns a fresh Firebase ID token
+ * (the Firebase SDK refreshes it automatically when it is about to expire). `forceRefresh` asks for a brand-new
+ * token after the server rejected the previous one.
+ */
+export type TokenProvider = (forceRefresh?: boolean) => Promise<string | null>;
+
+let tokenProvider: TokenProvider | null = null;
+let tokenProviderRefreshable = false;
+/** Bumped whenever the provider changes, so a late 401 from a previous session is ignored. */
+let providerVersion = 0;
 let unauthorizedHandler: (() => void) | null = null;
 
+export function setTokenProvider(provider: TokenProvider | null, options: { refreshable?: boolean } = {}): void {
+  tokenProvider = provider;
+  tokenProviderRefreshable = Boolean(provider && options.refreshable);
+  providerVersion += 1;
+}
+
+/** A fixed bearer token (API session token). Used by tests and the legacy API-session login. */
 export function setAuthToken(token: string | null): void {
-  authToken = token;
+  setTokenProvider(token ? async () => token : null);
 }
 
 /** Called when an authenticated request is rejected because the session is no longer valid. */
@@ -63,25 +80,19 @@ export function errorMessageFrom(error: any, fallback: string): string {
 export interface RequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: unknown;
-  /** Attach the session token. Defaults to true. */
+  /** Attach the credential from the token provider. Defaults to true. */
   auth?: boolean;
   signal?: AbortSignal;
 }
 
-/**
- * Performs a request and returns the parsed JSON envelope ({ success, data, ... }).
- * Throws ApiError for network failures, timeouts, non-2xx responses and non-JSON bodies.
- */
-export async function requestEnvelope(path: string, options: RequestOptions = {}): Promise<any> {
-  const base = resolveApiBaseUrl();
-  if (!base) throw new ApiError(NOT_CONFIGURED_MESSAGE, 'NOT_CONFIGURED');
-
-  const { method = 'GET', body, auth = true, signal } = options;
-  const headers: Record<string, string> = { Accept: 'application/json' };
-  if (body !== undefined) headers['Content-Type'] = 'application/json';
-  const sentToken = auth ? authToken : null;
-  if (sentToken) headers.Authorization = `Bearer ${sentToken}`;
-
+/** One HTTP round trip with timeout, cancellation and safe body parsing. */
+async function send(
+  url: string,
+  method: string,
+  headers: Record<string, string>,
+  body: unknown,
+  signal?: AbortSignal,
+): Promise<{ response: Response; data: any }> {
   const controller = new AbortController();
   let timedOut = false;
   const timer = setTimeout(() => {
@@ -93,7 +104,7 @@ export async function requestEnvelope(path: string, options: RequestOptions = {}
 
   let response: Response;
   try {
-    response = await fetch(`${base}${path}`, {
+    response = await fetch(url, {
       method,
       headers,
       body: body === undefined ? undefined : JSON.stringify(body),
@@ -110,13 +121,59 @@ export async function requestEnvelope(path: string, options: RequestOptions = {}
     signal?.removeEventListener('abort', onCallerAbort);
   }
 
-  const data = await readBody(response);
+  return { response, data: await readBody(response) };
+}
+
+/**
+ * Performs a request and returns the parsed JSON envelope ({ success, data, ... }).
+ * Throws ApiError for network failures, timeouts, non-2xx responses and non-JSON bodies.
+ *
+ * A 401 on a request that carried a credential is retried once with a force-refreshed Firebase token before the
+ * session is declared dead.
+ */
+export async function requestEnvelope(path: string, options: RequestOptions = {}): Promise<any> {
+  const base = resolveApiBaseUrl();
+  if (!base) throw new ApiError(NOT_CONFIGURED_MESSAGE, 'NOT_CONFIGURED');
+
+  const { method = 'GET', body, auth = true, signal } = options;
+  const versionAtStart = providerVersion;
+  const provider = auth ? tokenProvider : null;
+  const refreshable = tokenProviderRefreshable;
+
+  let forceRefresh = false;
+  let sentToken: string | null = null;
+  let result: { response: Response; data: any };
+
+  for (let attempt = 0; ; attempt += 1) {
+    sentToken = null;
+    if (provider) {
+      try {
+        sentToken = await provider(forceRefresh);
+      } catch {
+        throw new ApiError(NETWORK_ERROR_MESSAGE, 'NETWORK');
+      }
+    }
+
+    const headers: Record<string, string> = { Accept: 'application/json' };
+    if (body !== undefined) headers['Content-Type'] = 'application/json';
+    if (sentToken) headers.Authorization = `Bearer ${sentToken}`;
+
+    result = await send(`${base}${path}`, method, headers, body, signal);
+
+    if (result.response.status === 401 && sentToken && refreshable && attempt === 0) {
+      forceRefresh = true;
+      continue;
+    }
+    break;
+  }
+
+  const { response, data } = result;
 
   if (!response.ok) {
     const code: string = data?.error?.code || `HTTP_${response.status}`;
     const message = errorMessageFrom(data?.error, response.statusText || 'Something went wrong.');
-    // A rejected session on a request that carried a token means the session is gone.
-    if (sentToken && sentToken === authToken && response.status === 401) {
+    // A rejected credential on a request that carried one means the session is gone.
+    if (sentToken && versionAtStart === providerVersion && response.status === 401) {
       unauthorizedHandler?.();
     }
     throw new ApiError(message, code, response.status, data?.error?.details);

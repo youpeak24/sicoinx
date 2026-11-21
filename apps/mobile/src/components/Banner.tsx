@@ -9,7 +9,7 @@ const tones: Record<Tone, { bg: string; border: string; fg: string; icon: 'alert
   error: { bg: colors.dangerBg, border: colors.dangerBorder, fg: colors.danger, icon: 'alert-circle' },
   success: { bg: colors.successBg, border: colors.successBorder, fg: colors.success, icon: 'checkmark-circle' },
   warning: { bg: colors.warningBg, border: colors.warningBorder, fg: colors.warning, icon: 'warning' },
-  info: { bg: colors.paleBlue, border: colors.border, fg: colors.primaryDeep, icon: 'information-circle' },
+  info: { bg: colors.paleBlue, border: '#CFE0FF', fg: colors.primaryDeep, icon: 'information-circle' },
 };
 
 interface BannerProps {
@@ -36,9 +36,9 @@ export function Banner({ tone, title, message }: BannerProps) {
 }
 
 const styles = StyleSheet.create({
-  box: { flexDirection: 'row', gap: 10, padding: 12, borderRadius: radius.md, borderWidth: 1 },
+  box: { flexDirection: 'row', gap: 10, padding: 14, borderRadius: radius.md, borderWidth: 1 },
   icon: { marginTop: 1 },
   text: { flex: 1, gap: 2 },
   title: { fontSize: 13, fontWeight: '800' },
-  message: { fontSize: 13, lineHeight: 18 },
+  message: { fontSize: 13, lineHeight: 19 },
 });

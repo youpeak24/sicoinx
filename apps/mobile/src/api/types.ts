@@ -9,6 +9,18 @@ export interface User {
   mfaEnabled: boolean;
 }
 
+export type NotificationType = 'INFO' | 'SUCCESS' | 'WARNING' | 'ALERT' | string;
+
+export interface AppNotification {
+  id: string;
+  title: string;
+  message: string;
+  type: NotificationType;
+  isRead: boolean;
+  linkUrl: string | null;
+  createdAt: string;
+}
+
 export interface Wallet {
   id: string;
   address: string;

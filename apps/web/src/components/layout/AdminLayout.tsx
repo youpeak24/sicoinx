@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { SiLogo } from '../common/SiLogo';
-import { DevMailboxModal } from '../common/DevMailboxModal';
 import { PageTransition } from '../common/animations/PageTransition';
 import {
   LayoutDashboard,
@@ -309,7 +308,6 @@ export const AdminLayout: React.FC = () => {
         </div>
       )}
 
-      <DevMailboxModal />
     </div>
   );
 };

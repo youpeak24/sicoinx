@@ -17,7 +17,7 @@ import { colors, radius } from '@/theme';
 
 export default function TicketDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const ticketId = Array.isArray(id) ? id[0] : id;
+  const ticketId = Array.isArray(id) ? id[0]! : id;
 
   const { data, error, loading, refreshing, reload, refresh } = useResource(
     (signal) => getSupportTicket(ticketId, signal),
@@ -71,9 +71,9 @@ export default function TicketDetailScreen() {
           const staff = m.authorRole !== 'USER';
           return (
             <View key={m.id} style={[styles.bubble, staff ? styles.bubbleStaff : styles.bubbleUser]}>
-              <Text style={styles.author}>{staff ? `${m.authorName} · Support` : 'You'}</Text>
-              <Text style={styles.content}>{m.content}</Text>
-              <Text style={styles.time}>{formatDateTime(m.createdAt)}</Text>
+              <Text style={[styles.author, !staff && styles.authorUser]}>{staff ? `${m.authorName} · Support` : 'You'}</Text>
+              <Text style={[styles.content, !staff && styles.contentUser]}>{m.content}</Text>
+              <Text style={[styles.time, !staff && styles.timeUser]}>{formatDateTime(m.createdAt)}</Text>
             </View>
           );
         })}
@@ -103,14 +103,17 @@ export default function TicketDetailScreen() {
 
 const styles = StyleSheet.create({
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  category: { flex: 1, fontSize: 10, fontWeight: '800', color: colors.primary, textTransform: 'uppercase' },
-  subject: { fontSize: 16, fontWeight: '800', color: colors.text },
-  meta: { fontSize: 11, color: colors.muted },
+  category: { flex: 1, fontSize: 11, fontWeight: '800', color: colors.primary, textTransform: 'uppercase', letterSpacing: 0.4 },
+  subject: { fontSize: 18, fontWeight: '800', color: colors.text, letterSpacing: -0.3 },
+  meta: { fontSize: 12, color: colors.muted },
   thread: { gap: 10 },
-  bubble: { gap: 4, padding: 14, borderRadius: radius.lg, borderWidth: 1, maxWidth: '92%' },
-  bubbleUser: { alignSelf: 'flex-end', backgroundColor: colors.paleBlue, borderColor: colors.border },
-  bubbleStaff: { alignSelf: 'flex-start', backgroundColor: colors.surface, borderColor: colors.border },
+  bubble: { gap: 4, padding: 14, borderRadius: radius.lg, maxWidth: '92%' },
+  bubbleUser: { alignSelf: 'flex-end', backgroundColor: colors.primary, borderBottomRightRadius: 6 },
+  bubbleStaff: { alignSelf: 'flex-start', backgroundColor: colors.surface, borderWidth: 1, borderColor: '#EEF2FA', borderBottomLeftRadius: 6 },
   author: { fontSize: 11, fontWeight: '800', color: colors.primaryDeep },
-  content: { fontSize: 13, lineHeight: 19, color: colors.text },
-  time: { fontSize: 10, color: colors.muted },
+  authorUser: { color: 'rgba(255,255,255,0.85)' },
+  content: { fontSize: 14, lineHeight: 20, color: colors.text },
+  contentUser: { color: colors.white },
+  time: { fontSize: 11, color: colors.muted },
+  timeUser: { color: 'rgba(255,255,255,0.7)' },
 });

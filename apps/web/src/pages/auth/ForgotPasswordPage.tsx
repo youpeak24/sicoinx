@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
+import { toApiError } from '../../context/AuthContext';
 import { SiLogo } from '../../components/common/SiLogo';
 import { Mail, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
 
@@ -25,7 +26,7 @@ export const ForgotPasswordPage: React.FC = () => {
       }
       setIsSubmitted(true);
     } catch (err: any) {
-      setErrorMsg(err.message || 'Request failed. Please try again.');
+      setErrorMsg(toApiError(err, 'Request failed. Please try again.').message);
     } finally {
       setIsLoading(false);
     }
@@ -51,7 +52,8 @@ export const ForgotPasswordPage: React.FC = () => {
                 If an account exists for <strong>{email}</strong>, a single-use password reset link has been sent.
               </p>
               <div className="p-3 bg-[#EDF4FF] rounded-xl text-[11px] text-[#123B9A] border border-[#DFE8F5]">
-                💡 In local development, view this link instantly via the <strong>Dev Mailbox</strong> button at the bottom-right of your screen!
+                Check your inbox (and the spam folder) for an email from Firebase. No email? There may be no account
+                with this address — <Link to="/register" className="font-semibold underline">create one</Link>.
               </div>
               <div className="pt-2">
                 <Link to="/login" className="text-xs font-semibold text-[#175CFF] hover:underline">
